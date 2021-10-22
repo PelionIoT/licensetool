@@ -1,0 +1,4 @@
+package,version,recipe,license
+acl,2.2.53,acl,GPLv2+
+acl-dev,2.2.53,acl,LGPLv2.1+ & GPLv2+
+aktualizr-configs,1.0+gitAUTOINC+dad22588d7,aktualizr,MPL-2.0

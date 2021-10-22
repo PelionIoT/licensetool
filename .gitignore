@@ -1,0 +1,27 @@
+# Files to ignore when doing git add, unless you force them (git add -f)
+
+# assumed input/output files
+.license
+.csv
+.xlsx
+.xlsm
+.xlsb
+
+# Temporary / backup files
+.bak
+.tmp
+.$$$
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Python frameworks
+__pycache__/
+.pytest_cache
+.coverage

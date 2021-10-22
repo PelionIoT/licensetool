@@ -1,0 +1,10 @@
+pytest
+pytest-mock
+pytest-cov
+tox
+pylint
+pycodestyle
+coverage
+wheel
+bandit
+
