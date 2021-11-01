@@ -15,8 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""A tool for dealing with Yocto license manifest files, converting them to CSV-format or
-CSV-format with change information."""
+"""A tool for dealing with Yocto license manifest files, converting them to CSV-format
+or CSV-format with change information."""
 
 import sys
 import os
@@ -38,9 +38,12 @@ def _print_help():
     print("   Generate a CVS-formatted version of the Yocto manifest file")
     print("   For example license-tool.py cvs license.manifest licenses.cvs ")
     print("")
-    print("license-tool.py changes --previous <manifest file> --current <manifest file> --output <CVS file>")
-    print("   Generate a CVS-formatted version based on two Yocto manifest files that highlights the changes")
-    print("   For example license-tool.py changes license.manifest.v83 license.manifest.v83 license-chanages.cvs ")
+    print("license-tool.py changes --previous <manifest file> --current <manifest file> "
+          "--output <CVS file>")
+    print("   Generate a CVS-formatted version based on two Yocto manifest files that"
+          " highlights the changes")
+    print("   For example license-tool.py changes license.manifest.v83 license.manifest.v83 "
+          "license-chanages.cvs")
     print("")
     print("Optional:")
     print(" --verbose   verbose output")
@@ -51,6 +54,7 @@ def _print_help():
 # NOTE! Does NOT check if file exists!
 #
 def _get_file_size(file):
+
     """Get file size by seeking it to the end."""
     with open(file, encoding="utf-8") as f_h:
         # Get file size so that we can recognize end of file reliably
@@ -62,6 +66,7 @@ def _get_file_size(file):
 #                         and a status dictionary.
 #
 def read_manifest_file(input_file):
+
     """Read license manifest file and turn into a DataFrame."""
     # File format is:
     # PACKAGE NAME: acl
@@ -144,8 +149,8 @@ def read_manifest_file(input_file):
                     lines_left = False
                 else:
                     # Out of sync somehow?
-                    dbgstr = "ERROR at line " + str(lines) + "expecting empty line, got '" + line5 + "' instead - out of SYNC."
-                    logging.error("ERROR - OUT OF SYNC at line %s - expecting empty line, got %s", str(lines), line5)
+                    logging.error("ERROR - OUT OF SYNC at %s expecting empty line"
+                                  ", got %s",  str(lines), line5)
                     problems = True
                     lines_left = False
             # We have a package to add
@@ -158,10 +163,12 @@ def read_manifest_file(input_file):
             d_f = d_f.append(new_row, ignore_index = True)
             packages = packages + 1
 
-            # Check next line to see if it's empty too (likely end of file then, it ends with 2 empty lines)
+            # Check next line to see if it's empty too (likely end of file then
+            # it ends with 2 empty lines)
             posnow = f_h.tell()
             nextline = f_h.readline()
-            if nextline in ("\n", "\r\n", "\n\r") and posnow >= (file_size - 2): # 2nd empty line in row, file ends
+            # 2nd empty line in row, file ends?
+            if nextline in ("\n", "\r\n", "\n\r") and posnow >= (file_size - 2):
                 logging.debug("Empty line, end reached at %s/%s.", str(posnow), str(file_size))
                 lines = lines + 1
                 lines_left = False
@@ -171,10 +178,12 @@ def read_manifest_file(input_file):
 
     # All done or some error encountered.
     if problems is True:
-        dbgstr = "Processed " + str(lines) + " lines and " + str(packages) + " packages, but with errors."
+        dbgstr = "Processed " + str(lines) + " lines and " + str(packages) + \
+                 " packages, but with errors."
         logging.info(dbgstr)
     else:
-        dbgstr = "Processed " + str(lines) + " lines and " + str(packages) + " packages successfully."
+        dbgstr = "Processed " + str(lines) + " lines and " + str(packages) + \
+                 " packages successfully."
         logging.info(dbgstr)
     status = {"lines": lines, "packages": packages, "errors" : problems}
     return d_f, status
@@ -184,6 +193,7 @@ def read_manifest_file(input_file):
 #           filenames of input file and output file needed as parameters
 #
 def _csv(inputfile, outputfile):
+
     logging.debug("_csv: '%s','%s'", inputfile, outputfile)
 
     # Covert the manifest to a Pandas dataframe
@@ -200,6 +210,7 @@ def _csv(inputfile, outputfile):
 # _changes - generate change information based on two Yocto license manifest files
 #
 def _changes(previous, current, output):
+
     logging.debug("_changes: '%s', '%s', '%s'", previous, current, output)
     d_f_prev, status_prev = read_manifest_file(previous)
     if status_prev["errors"] is True:
@@ -218,12 +229,14 @@ def _changes(previous, current, output):
     print(previous + " " + str(status_curr) )
 
 def _parse_args():
+
     parser = argparse.ArgumentParser()
 
     # Two command modes, csv and change
 
     subparsers = parser.add_subparsers(dest="command")
-    parser_csv = subparsers.add_parser("csv", help="create CVS file of Yocto License manifest file.")
+    parser_csv = subparsers.add_parser("csv",
+        help="create CVS file of Yocto License manifest file.")
     parser_csv.add_argument(
         "inputfile",
         help="Yocto license manifest file name (used as input)",
@@ -233,7 +246,8 @@ def _parse_args():
         help="Name for CSV-formatted output file name",
     )
 
-    parser_changes = subparsers.add_parser("changes", help="Create changes highlighting list from two Yocto license manifest files.")
+    parser_changes = subparsers.add_parser("changes",
+        help="Create changes highlighting list from two Yocto license manifest files.")
     parser_changes.add_argument(
         "previous",
         help="Previous Yocto license manifest file name",
@@ -267,6 +281,7 @@ def _parse_args():
     return args
 
 def main():
+
     """Script entry point."""
     args = _parse_args()
     if args.command == "csv":
@@ -291,4 +306,5 @@ def main():
         _changes(args.previous, args.current, args.changefile)
 
 if __name__ == "__main__":
+
     sys.exit(main())

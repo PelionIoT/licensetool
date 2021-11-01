@@ -37,6 +37,6 @@ pytest --cov=licensetool tests/
 All contributions must be done with compliance to Apache 2.0 license.
 All contributions must pass:
 - Code review, so submit a pull request (PR).
-- Run `pylint licensetool.py` and make sure the score does not get worse (9.19 now).
+- Run `pylint licensetool.py` and make sure the score does not get worse (9.82 now).
 - Include necessary test case updates, so that coverage does not decrease - provide evidence in the PR.
 - Include required documentation updates.
