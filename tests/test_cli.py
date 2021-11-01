@@ -47,7 +47,7 @@ def test_cvs_input_missing():
     assert ret != 0
 
 def test_cvs_output_existing():
-    ret = os.system("python licensetool.py csv tests/3-packages.manifest tests/3-packages.manifest")
+    ret = os.system("python licensetool.py csv tests/3-packages.manifest tests/3-packages.manifest.v2")
     assert ret != 0
 
 def test_changes_only():
@@ -63,7 +63,7 @@ def test_changes_input2_missing():
     assert ret != 0
 
 def test_cvs_output_existing():
-    ret = os.system("python licensetool.py changes tests/3-packages.manifest tests/3-packages.manifest.v2 tests/3-packages.manifest")
+    ret = os.system("python licensetool.py changes tests/3-packages.manifest tests/3-packages.manifest.v2 tests/3-packages.manifest.nolines")
     assert ret != 0
 
 def test_changes_input_ok_output(tmpdir):

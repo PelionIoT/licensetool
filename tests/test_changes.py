@@ -38,3 +38,19 @@ def test_empty_license_curr(tmpdir):
 def test_outfile_exists(tmpdir):
     ret = os.system("python licensetool.py changes tests/3-packages.manifest tests/3-packages.manifest tests/empty_file.manifest")
     assert ret != 0
+
+# Invalid previous
+def test_invalid_previous(tmpdir):
+    ret = os.system("python licensetool.py changes tests/broken.manifest tests/3-packages.manifest tests/empty_file.manifest")
+    assert ret != 0
+
+# Invalid current
+def test_invalid_current(tmpdir):
+    ret = os.system("python licensetool.py changes tests/3-packages.manifest tests/broken.manifest tests/empty_file.manifest")
+    assert ret != 0
+
+# Success case
+def test_changes_3packages_v2(tmpdir):
+    tmp_outfile = str(tmpdir.join("out.cvs"))
+    ret = os.system("python licensetool.py changes tests/3-packages.manifest tests/3-packages.manifest.v2 " + tmp_outfile )
+    assert ret != 0
