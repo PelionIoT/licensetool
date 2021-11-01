@@ -29,7 +29,7 @@ Tests and test material are located in [tests](tests)-folder.
 You can them from the root folder:
 
 ```
-pytest --cov=licensetool
+pytest --cov=licensetool tests/
 ```
 
 ## Contributions
@@ -37,5 +37,6 @@ pytest --cov=licensetool
 All contributions must be done with compliance to Apache 2.0 license.
 All contributions must pass:
 - Code review, so submit a pull request (PR).
+- Run `pylint licensetool.py` and make sure the score does not get worse (9.19 now).
 - Include necessary test case updates, so that coverage does not decrease - provide evidence in the PR.
 - Include required documentation updates.
