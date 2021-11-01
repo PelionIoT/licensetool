@@ -16,14 +16,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ----------------------------------------------------------------------------
+set -ex
 
+# Create virtual environment if one is not in place
 if [[ ! -d venv ]]; then
-    virtualenv -p python3 venv
+    python3 -m venv venv
 fi
 
 source venv/bin/activate
 
-pip uninstall licensetool --yes
+if [pip show licensetool]; then
+    pip uninstall licensetool --yes
+fi
 pip install --editable .
 
+pip install -r requirements.txt
 pip install -r dev-requirements.txt
