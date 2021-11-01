@@ -29,7 +29,7 @@ Tests and test material are located in [tests](tests)-folder.
 You can them from the root folder:
 
 ```
-pytest --cov=licensetool tests/
+pytest --cov=licensetool --cov-report term-missing tests/
 ```
 
 ## Contributions
