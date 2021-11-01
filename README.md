@@ -11,17 +11,16 @@ LicenseTool is a Python program that has two primary functions:
 
 ## Installation
 
-`python -m pip install -r requirements.txt`
 
 ## Usage
 
 ### Generate CSV-formatted license file
 
-`python licensetool.py csv <input manifest file> <output CSV-file>`
+`python licensetool csv <input manifest file> <output CSV-file>`
 
 ### Generate license changes file
 
-`python licensetool.py changes <previous manifest file> <current manifest file> <output CSV-file>`
+`python licensetool changes <previous manifest file> <current manifest file> <output CSV-file>`
 
 
 ## Tests

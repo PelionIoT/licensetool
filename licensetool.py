@@ -73,21 +73,7 @@ def read_manifest_file(input_file):
     logging.debug("_read_manifest_file: %s",input_file)
 
     file_size = _get_file_size(input_file)
-    with open(input_file, encoding="utf-8") as f_h_orig:
-
-        f_h = open(input_file+".temp", "w+")
-
-        lineTotalCount = 0
-        file_lines = ""
-        for line in f_h_orig:
-            file_lines+=line
-            lineTotalCount+=1
-            if len(line.strip()) != 0: # only write file_lines total buffer once we hit non empty lines.
-                #this is just to remove empty lines from end of the file as code below does not handle it well
-                #generally simple regexp should do the trick of parsing content to csv with few fewer lines
-                f_h.write(file_lines)
-                file_lines=""
-        f_h.seek(0)
+    with open(input_file, encoding="utf-8") as f_h:
 
         # Create empty dataframe
         column_names = ["package", "version", "recipe", "license"]
@@ -97,7 +83,6 @@ def read_manifest_file(input_file):
         lines = 0
         packages = 0
         problems = False
-
         while lines_left is True:
             line1 = f_h.readline()
             lines = lines + 1
@@ -224,40 +209,13 @@ def _changes(previous, current, output):
     if status_curr["errors"] is True:
         print("ERROR - handling of '" + current + "' failed.")
         sys.exit(71) # EPROTO
-    
-    
-    f_orig = open("orig_csv.csv", "w+")
-    f_new = open("new_csv.csv", "w+")
-    output_file = open(output, "w")
-    diffcount = 0
-    d_f_prev.to_csv(f_orig, index=False)
-    d_f_curr.to_csv(f_new, index=False)
-    f_orig.seek(0)
-    f_new.seek(0)
-
-    orig_csv = f_orig.readlines()
-    new_csv = f_new.readlines()
-
-    first = True
-    for line in new_csv:
-        if line.strip():
-            if line not in orig_csv:
-                if first:
-                    print("Changes in Modules (Not found in original eg. added or changes)")
-                    first = False
-                print(line.strip())
-                output_file.write(line)
-
-    first = True
-    for line in orig_csv:
-        if line.strip():
-            if line not in new_csv:
-                if first:
-                    print("\n")
-                    print("Changes in Modules (Not found in new eg. removed or changes)")
-                    first = False
-                print(line.strip())
-                output_file.write(line)
+    # Merge the tables
+    d_f = d_f_prev.compare(d_f_curr, align_axis=1, keep_shape=True, keep_equal=True )
+    # Loop through for changes
+    # Export CSV
+    d_f.to_csv(output, index=False)
+    print(current + " " + str(status_prev) )
+    print(previous + " " + str(status_curr) )
 
 def _parse_args():
     parser = argparse.ArgumentParser()
@@ -328,7 +286,8 @@ def main():
             print("ERROR - current license file: '" + args.current + "' does not exist.")
             sys.exit(2) # ENOENT
         if os.path.isfile(args.changefile):
-            print("Warning - output file: '" + args.changefile + "' already exists. Will be overwritten")
+            print("ERROR - output file: '" + args.changefile + "' already exists.")
+            sys.exit(1) # EPERM
         _changes(args.previous, args.current, args.changefile)
 
 if __name__ == "__main__":
