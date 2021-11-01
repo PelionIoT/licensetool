@@ -23,6 +23,8 @@ import os
 import logging
 import argparse
 import pandas as pd
+import re
+import tempfile
 
 # Yocto license file headers/row identifiers
 PACK_NAME = "PACKAGE NAME:"
@@ -67,132 +69,42 @@ def _get_file_size(file):
 #
 def read_manifest_file(input_file):
 
-    """Read license manifest file and turn into a DataFrame."""
-    # File format is:
-    # PACKAGE NAME: acl
-    # PACKAGE VERSION: 2.2.53
-    # RECIPE NAME: acl
-    # LICENSE: GPLv2+
-    # empty line
-    # - next similar entry
-    logging.debug("_read_manifest_file: %s",input_file)
+    pattern = re.compile("PACKAGE NAME: (.*)\nPACKAGE VERSION: (.*)\nRECIPE NAME: (.*)\nLICENSE: (.*)\n\n")
+    f_h = open(input_file, "r")
+    data = f_h.read()
+    # Create empty dataframe
+    column_names = ["package", "version", "recipe", "license"]
+    d_f = pd.DataFrame(columns=column_names)
 
-    file_size = _get_file_size(input_file)
-    with open(input_file, encoding="utf-8") as f_h:
+    packageCount = 0
+    errors = False
+    prew = 0
+    for info_field in re.finditer(pattern, data):
+        packageCount+=1
+        if info_field.span()[0] != prew:
+            print("Invalid content in the file")
+            errors = True # there is some content not matching the pattern in file.
+        prew = info_field.span()[1]
 
-        # Create empty dataframe
-        column_names = ["package", "version", "recipe", "license"]
-        d_f = pd.DataFrame(columns = column_names)
+        new_row = {column_names[0]: info_field.group(1),
+                column_names[1]: info_field.group(2),
+                column_names[2]: info_field.group(3),
+                column_names[3]: info_field.group(4)}
+        d_f = d_f.append(new_row, ignore_index=True)
 
-        lines_left = True
-        lines = 0
-        packages = 0
-        problems = False
-        while lines_left is True:
-            line1 = f_h.readline()
-            lines = lines + 1
-            if line1.find(PACK_NAME) == 0:
-                # Pack name found
-                logging.debug("line1='%s'", line1.strip())
-            else:
-                if line1 in ('', '\r\n', '\n') and lines != 0 : # empty line, likely ends here
-                    logging.debug("line1 is empty")
-                    lines_left = False
-                    problems = True
-                else:
-                    # could be we are at the end, two empty lines there
-                    posnow = f_h.tell()
-                    if posnow >= (file_size - 2):
-                        logging.debug("Within 2 chars of file end %s,  EOF reached.", str(posnow))
-                    else:
-                        problems = True
-                        logging.error("Error - line {lines} has no {PACK_NAME}")
-                        lines_left = False
-                    break
-            line2 = f_h.readline()
-            lines = lines + 1
-            if line2.find(PACK_VER) == 0:
-                # Pack version found
-                logging.debug("line2='%s'", line2.strip() )
-            else:
-                lines_left = False
-                problems = True
-                logging.error("Error - line %s has no %s", str(lines), PACK_VER)
-                break
-            line3 = f_h.readline()
-            lines = lines + 1
-            if line3.find(REC_NAME) == 0:
-                # Recipe name found
-                logging.debug("line3='%s'", line3.strip())
-            else:
-                lines_left = False
-                problems = True
-                logging.error("Error - line %s has no %s", str(lines), REC_NAME)
-                break
-            line4 = f_h.readline()
-            lines = lines + 1
-            if line4.find(LIC_NAME) == 0:
-                # License name found
-                logging.debug("line4='%s'", line4.strip())
-            else:
-                lines_left = False
-                problems = True
-                logging.error("Error - line %s has no %s", str(lines), LIC_NAME)
-                break
-            line5 = f_h.readline()
-            lines = lines + 1
-            if line5 in ("\n", "\r\n", "\n\r"):
-                # OK, empty line found
-                logging.debug("line5 is empty")
-            else:
-                if line5 == "": # nothing, end of file
-                    lines_left = False
-                else:
-                    # Out of sync somehow?
-                    logging.error("ERROR - OUT OF SYNC at %s expecting empty line"
-                                  ", got %s",  str(lines), line5)
-                    problems = True
-                    lines_left = False
-            # We have a package to add
-            new_row = {column_names[0] : line1[len(PACK_NAME)+1:len(line1)-1],
-                    column_names[1] : line2[len(PACK_VER) +1:len(line2)-1],
-                    column_names[2] : line3[len(REC_NAME) +1:len(line3)-1],
-                    column_names[3] : line4[len(LIC_NAME) +1:len(line4)-1] }
-            logging.info(str(new_row))
-            #append row to the dataframe
-            d_f = d_f.append(new_row, ignore_index = True)
-            packages = packages + 1
+    if packageCount == 0: # needs to have at least one package or it is an error
+        print("Package count is zero")
+        errors = True
 
-            # Check next line to see if it's empty too (likely end of file then
-            # it ends with 2 empty lines)
-            posnow = f_h.tell()
-            nextline = f_h.readline()
-            # 2nd empty line in row, file ends?
-            if nextline in ("\n", "\r\n", "\n\r") and posnow >= (file_size - 2):
-                logging.debug("Empty line, end reached at %s/%s.", str(posnow), str(file_size))
-                lines = lines + 1
-                lines_left = False
-            else:
-                # it's not empty line, let's get back where we were and process next entry
-                f_h.seek(posnow)
+    data_len = len(data)
+    if data_len != prew:
+        # if not all data was matched it is an error
+        print("Invalid content at end of file")
+        errors = True
 
-    # All done or some error encountered.
-    if problems is True:
-        dbgstr = "Processed " + str(lines) + " lines and " + str(packages) + \
-                 " packages, but with errors."
-    else:
-        # Must be at least one package - which in minimum is 4 lines
-        if lines < 4 or packages == 0:
-            problems = True
-            dbgstr = "Processed " + str(lines) + " lines and " + str(packages) + \
-                 " packages, found no packages."
-        else:
-            dbgstr = "Processed " + str(lines) + " lines and " + str(packages) + \
-                " packages successfully."
-    logging.info(dbgstr)
-    status = {"lines": lines, "packages": packages, "errors" : problems}
+    num_lines = sum(1 for line in data.split("\n"))
+    status = {"lines": num_lines, "packages": packageCount, "errors": errors}
     return d_f, status
-
 
 # _csv - generate CSV-file from a license manifest file
 #           filenames of input file and output file needed as parameters
@@ -225,13 +137,42 @@ def _changes(previous, current, output):
     if status_curr["errors"] is True:
         print("ERROR - handling of '" + current + "' failed.")
         sys.exit(71) # EPROTO
-    # Merge the tables
-    d_f = d_f_prev.compare(d_f_curr, align_axis=1, keep_shape=True, keep_equal=True )
-    # Loop through for changes
-    # Export CSV
-    d_f.to_csv(output, index=False)
-    print(current + " " + str(status_prev) )
-    print(previous + " " + str(status_curr) )
+
+    f_orig = tempfile.TemporaryFile()
+    f_new = tempfile.TemporaryFile()
+    #f_orig = open(output+"orig_csv.temp.csv", "w+")
+    #f_new = open(output+"new_csv.temp.csv", "w+")
+
+    output_file = open(output, "w")
+    diffcount = 0
+    d_f_prev.to_csv(f_orig, index=False)
+    d_f_curr.to_csv(f_new, index=False)
+
+    orig_csv = f_orig.readlines()
+    new_csv = f_new.readlines()
+    f_orig.close()
+    f_new.close()
+
+    first = True
+    for line in new_csv:
+        if line.strip():
+            if line not in orig_csv:
+                if first:
+                    print("Changes in Modules (Not found in original eg. added or changes)")
+                    first = False
+                print(line.strip())
+                output_file.write("new has,"+line)
+
+    first = True
+    for line in orig_csv:
+        if line.strip():
+            if line not in new_csv:
+                if first:
+                    print("\n")
+                    print("Changes in Modules (Not found in new eg. removed or changes)")
+                    first = False
+                print(line.strip())
+                output_file.write("old has,"+line)
 
 def _parse_args():
 
@@ -266,6 +207,8 @@ def _parse_args():
         help="Name for CSV-formatted changes file name",
     )
 
+    parser.add_argument("--forcemode", help="Force overwrite of existing output", action='store_true')
+
     parser.add_argument("--verbose", help="Verbose diagnostics", action="store_const",
         dest="loglevel",const=logging.INFO)
 
@@ -294,8 +237,12 @@ def main():
             print("ERROR - input file: '" + args.inputfile + "' does not exist.")
             sys.exit(2) # ENOENT
         if os.path.isfile(args.csvfile):
-            print("ERROR - output file: '" + args.csvfile + "' already exists.")
-            sys.exit(1) # EPERM
+            if not args.forcemode:
+                print("ERROR - output file: '" + args.csvfile + "' already exists.")
+                sys.exit(2)  # ENOENT
+            else:
+                print("Warning - output file: '" + args.csvfile + "' already exists. Will overwrite")
+
         _csv(args.inputfile, args.csvfile)
 
     if args.command == "changes":
@@ -306,8 +253,12 @@ def main():
             print("ERROR - current license file: '" + args.current + "' does not exist.")
             sys.exit(2) # ENOENT
         if os.path.isfile(args.changefile):
-            print("ERROR - output file: '" + args.changefile + "' already exists.")
-            sys.exit(1) # EPERM
+            if not args.forcemode:
+                print("ERROR - output file: '" + args.changefile + "' already exists.")
+                sys.exit(2)  # ENOENT
+            else:
+                print("Warning - output file: '" + args.changefile + "' already exists. Will overwrite")
+
         _changes(args.previous, args.current, args.changefile)
 
 if __name__ == "__main__":

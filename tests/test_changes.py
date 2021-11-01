@@ -53,4 +53,4 @@ def test_invalid_current(tmpdir):
 def test_changes_3packages_v2(tmpdir):
     tmp_outfile = str(tmpdir.join("out.cvs"))
     ret = os.system("python licensetool.py changes tests/3-packages.manifest tests/3-packages.manifest.v2 " + tmp_outfile )
-    assert ret != 0
+    assert ret == 0
