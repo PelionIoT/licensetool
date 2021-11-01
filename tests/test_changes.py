@@ -22,14 +22,19 @@ import pytest
 import pandas as pd
 import licensetool as t
 
-# Test empty file
+# Test previous empty file
 def test_empty_license_prev(tmpdir):
     tmp_outfile = str(tmpdir.join("out.cvs"))
     ret = os.system("python licensetool.py changes tests/empty_file.manifest tests/3-packages.manifest.v2 " + tmp_outfile)
     assert ret != 0
 
+# Test empty current file
 def test_empty_license_curr(tmpdir):
     tmp_outfile = str(tmpdir.join("out.cvs"))
     ret = os.system("python licensetool.py changes tests/3-packages.manifest tests/empty_file.manifest " + tmp_outfile)
     assert ret != 0
 
+# If output file exists, it should refuse to overwrite
+def test_outfile_exists(tmpdir):
+    ret = os.system("python licensetool.py changes tests/3-packages.manifest tests/3-packages.manifest tests/empty_file.manifest")
+    assert ret != 0
