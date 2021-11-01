@@ -53,11 +53,26 @@ def test_out_of_sync():
     assert status["errors"] == True
     assert df.empty == False    # There will be one entry in the DataFrame
 
+def test_broken_manifest():
+    df, status = t.read_manifest_file("tests/broken.manifest")
+    assert status["errors"] == True
+    assert df.empty == True
+
 # Test a known successfull cases, with 3 packages only.
 def test_3_packages():
     df, status = t.read_manifest_file("tests/3-packages.manifest")
     assert status["errors"] == False
     assert status["lines"] == 16
+    assert status["packages"] == 3
+    assert df.empty == False
+    ref_df = pd.read_csv("tests/3-packages.csv")
+    assert df.equals(ref_df)
+
+# Test a known successfull cases, with 3 packages only and no empty lines at the end
+def test_3_packages_noemptylines():
+    df, status = t.read_manifest_file("tests/3-packages.manifest.nolines")
+    assert status["errors"] == False
+    assert status["lines"] == 15
     assert status["packages"] == 3
     assert df.empty == False
     ref_df = pd.read_csv("tests/3-packages.csv")

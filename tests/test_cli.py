@@ -29,6 +29,10 @@ def test_cvs_only():
     ret = os.system("python licensetool.py csv")
     assert ret != 0
 
+def test_cvs_non_valid_option():
+    ret = os.system("python licensetool.py csv --abba")
+    assert ret != 0
+
 def test_cvs_input_only():
     ret = os.system("python licensetool.py csv tests/3-packages.manifest")
     assert ret != 0

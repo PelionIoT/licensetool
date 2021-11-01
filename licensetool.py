@@ -180,11 +180,16 @@ def read_manifest_file(input_file):
     if problems is True:
         dbgstr = "Processed " + str(lines) + " lines and " + str(packages) + \
                  " packages, but with errors."
-        logging.info(dbgstr)
     else:
-        dbgstr = "Processed " + str(lines) + " lines and " + str(packages) + \
-                 " packages successfully."
-        logging.info(dbgstr)
+        # Must be at least one package - which in minimum is 4 lines
+        if lines < 4 or packages == 0:
+            problems = True
+            dbgstr = "Processed " + str(lines) + " lines and " + str(packages) + \
+                 " packages, found no packages."
+        else:
+            dbgstr = "Processed " + str(lines) + " lines and " + str(packages) + \
+                " packages successfully."
+    logging.info(dbgstr)
     status = {"lines": lines, "packages": packages, "errors" : problems}
     return d_f, status
 
