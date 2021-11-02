@@ -22,9 +22,9 @@ import sys
 import os
 import logging
 import argparse
-import pandas as pd
 import re
 import tempfile
+import pandas as pd
 
 def _print_help():
 
@@ -63,8 +63,10 @@ def _get_file_size(file):
 #
 def read_manifest_file(input_file):
 
+    """Read manifest file and return a Panda's dataframe ."""
+
     pattern = re.compile("PACKAGE NAME: (.*)\nPACKAGE VERSION: (.*)\nRECIPE NAME: (.*)\nLICENSE: (.*)\n\n")
-    f_h = open(input_file, "r")
+    f_h = open(input_file, "r", encoding='utf8')
     data = f_h.read()
     # Create empty dataframe
     column_names = ["package", "version", "recipe", "license"]
@@ -137,8 +139,7 @@ def _changes(previous, current, output):
     #f_orig = open(output+"orig_csv.temp.csv", "w+")
     #f_new = open(output+"new_csv.temp.csv", "w+")
 
-    output_file = open(output, "w")
-    diffcount = 0
+    output_file = open(output, "w", encoding="utf-8")
     d_f_prev.to_csv(f_orig, index=False)
     d_f_curr.to_csv(f_new, index=False)
 
