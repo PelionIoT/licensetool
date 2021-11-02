@@ -44,19 +44,6 @@ def _print_help():
     print(" --verbose   verbose output")
     print(" --debug     debug level output (warning, a lot!)")
 
-# _get_file_size(file) - return size of file (name given as string) by seeking the end of file.
-#
-# NOTE! Does NOT check if file exists!
-#
-def _get_file_size(file):
-
-    """Get file size by seeking it to the end."""
-    with open(file, encoding="utf-8") as f_h:
-        # Get file size so that we can recognize end of file reliably
-        f_h.seek(0,2) # offset=0, whence = 2 at the end
-        file_size = f_h.tell()  # position now at the end == file size
-    return file_size
-
 # read_manifest_file - read Yocto license manifest and turn into a Panda's dataframe
 #                         and a status dictionary.
 #
