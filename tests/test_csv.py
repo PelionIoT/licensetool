@@ -68,12 +68,7 @@ def test_3_packages():
     ref_df = pd.read_csv("tests/3-packages.csv")
     assert df.equals(ref_df)
 
-# Test a known successfull cases, with 3 packages only and no empty lines at the end
+# Test a known successfull cases, with 3 packages only and no empty lines at the end eg. broken package
 def test_3_packages_noemptylines():
     df, status = t.read_manifest_file("tests/3-packages.manifest.nolines")
-    assert status["errors"] == False
-    assert status["lines"] == 15
-    assert status["packages"] == 3
-    assert df.empty == False
-    ref_df = pd.read_csv("tests/3-packages.csv")
-    assert df.equals(ref_df)
+    assert status["errors"] == True
