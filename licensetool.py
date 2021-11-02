@@ -126,13 +126,19 @@ def _changes(previous, current, output):
 
     logging.debug("_changes: '%s', '%s', '%s'", previous, current, output)
     d_f_prev, status_prev = read_manifest_file(previous)
-    d_f_prev.rename(columns={"version":"prev_ver", "license":"prev_license", "recipe":"prev_recipe"}, inplace=True)
+    d_f_prev.rename(
+        columns={"version":"prev_ver", "license":"prev_license", "recipe":"prev_recipe"},
+        inplace=True
+    )
     if status_prev["errors"] is True:
         print("ERROR - handling of '" + previous + "' failed.")
         sys.exit(71) # EPROTO
 
     d_f_curr, status_curr = read_manifest_file(current)
-    d_f_curr.rename(columns={"version":"curr_ver", "license":"curr_license", "recipe":"curr_recipe"}, inplace=True)
+    d_f_curr.rename(
+        columns={"version":"curr_ver", "license":"curr_license", "recipe":"curr_recipe"},
+        inplace=True
+    )
     if status_curr["errors"] is True:
         print("ERROR - handling of '" + current + "' failed.")
         sys.exit(71) # EPROTO
@@ -158,7 +164,6 @@ def _parse_args():
         "csvfile",
         help="Name for CSV-formatted output file name",
     )
-
     parser_changes = subparsers.add_parser("changes",
         help="Create changes highlighting list from two Yocto license manifest files.")
     parser_changes.add_argument(
@@ -173,19 +178,25 @@ def _parse_args():
         "changefile",
         help="Name for CSV-formatted changes file name",
     )
-
-    parser.add_argument("--forcemode", help="Force overwrite of existing output", action='store_true')
-
-    parser.add_argument("--verbose", help="Verbose diagnostics", action="store_const",
-        dest="loglevel",const=logging.INFO)
-
-    parser.add_argument("--debug", help="Extra diagnostic output", action="store_const",
-        dest="loglevel",const=logging.DEBUG,default=logging.WARNING)
-
+    parser.add_argument("--forcemode",
+        help="Force overwrite of existing output",
+        action='store_true'
+    )
+    parser.add_argument("--verbose",
+        help="Verbose diagnostics",
+        action="store_const",
+        dest="loglevel",
+        const=logging.INFO
+    )
+    parser.add_argument("--debug",
+        help="Extra diagnostic output",
+        action="store_const",
+        dest="loglevel",
+        const=logging.DEBUG,
+        default=logging.WARNING
+    )
     args, unknown = parser.parse_known_args()
-
     logging.basicConfig(level=args.loglevel,format='')
-
     if not args.command:
         _print_help()
         sys.exit(0)
@@ -208,7 +219,8 @@ def main():
                 print("ERROR - output file: '" + args.csvfile + "' already exists.")
                 sys.exit(2)  # ENOENT
             else:
-                print("Warning - output file: '" + args.csvfile + "' already exists. Will overwrite.")
+                print("Warning - output file: '" + args.csvfile + "' already exists. "
+                    "Will overwrite.")
 
         _csv(args.inputfile, args.csvfile)
 
@@ -224,7 +236,8 @@ def main():
                 print("ERROR - output file: '" + args.changefile + "' already exists.")
                 sys.exit(2)  # ENOENT
             else:
-                print("Warning - output file: '" + args.changefile + "' already exists. Will overwrite.")
+                print("Warning - output file: '" + args.changefile + "' already exists. "
+                    "Will overwrite.")
 
         _changes(args.previous, args.current, args.changefile)
 
