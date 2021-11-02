@@ -26,12 +26,6 @@ import pandas as pd
 import re
 import tempfile
 
-# Yocto license file headers/row identifiers
-PACK_NAME = "PACKAGE NAME:"
-PACK_VER  = "PACKAGE VERSION:"
-REC_NAME  = "RECIPE NAME:"
-LIC_NAME  = "LICENSE:"
-
 def _print_help():
 
     print("Yocto license manifest tool")
