@@ -53,40 +53,40 @@ def read_manifest_file(input_file):
 
     pattern = re.compile("PACKAGE NAME: (.*)\nPACKAGE VERSION: (.*)\nRECIPE NAME: (.*)\n"
                          "LICENSE: (.*)\n\n")
-    f_h = open(input_file, "r", encoding='utf8')
-    data = f_h.read()
-    # Create empty dataframe
-    column_names = ["package", "version", "recipe", "license"]
-    d_f = pd.DataFrame(columns=column_names)
+    with open(input_file, "r", encoding='utf8') as f_h:
+        data = f_h.read()
+        # Create empty dataframe
+        column_names = ["package", "version", "recipe", "license"]
+        d_f = pd.DataFrame(columns=column_names)
 
-    package_count = 0
-    errors = False
-    prew = 0
-    for info_field in re.finditer(pattern, data):
-        package_count+=1
-        if info_field.span()[0] != prew:
-            print("Invalid content in the file")
-            errors = True # there is some content not matching the pattern in file.
-        prew = info_field.span()[1]
+        package_count = 0
+        errors = False
+        prew = 0
+        for info_field in re.finditer(pattern, data):
+            package_count+=1
+            if info_field.span()[0] != prew:
+                print("Invalid content in the file")
+                errors = True # there is some content not matching the pattern in file.
+            prew = info_field.span()[1]
 
-        new_row = {column_names[0]: info_field.group(1),
-                column_names[1]: info_field.group(2),
-                column_names[2]: info_field.group(3),
-                column_names[3]: info_field.group(4)}
-        d_f = d_f.append(new_row, ignore_index=True)
+            new_row = {column_names[0]: info_field.group(1),
+                    column_names[1]: info_field.group(2),
+                    column_names[2]: info_field.group(3),
+                    column_names[3]: info_field.group(4)}
+            d_f = d_f.append(new_row, ignore_index=True)
 
-    if package_count == 0: # needs to have at least one package or it is an error
-        print("Package count is zero")
-        errors = True
+        if package_count == 0: # needs to have at least one package or it is an error
+            print("Package count is zero")
+            errors = True
 
-    data_len = len(data)
-    if data_len != prew:
-        # if not all data was matched it is an error
-        print("Invalid content at end of file")
-        errors = True
+        data_len = len(data)
+        if data_len != prew:
+            # if not all data was matched it is an error
+            print("Invalid content at end of file")
+            errors = True
 
-    num_lines = sum(1 for line in data.split("\n"))
-    status = {"lines": num_lines, "packages": package_count, "errors": errors}
+        num_lines = sum(1 for line in data.split("\n"))
+        status = {"lines": num_lines, "packages": package_count, "errors": errors}
     return d_f, status
 
 # _csv - generate CSV-file from a license manifest file
