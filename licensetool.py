@@ -178,8 +178,8 @@ def _parse_args():
         "changefile",
         help="Name for CSV-formatted changes file name",
     )
-    parser.add_argument("--forcemode",
-        help="Force overwrite of existing output",
+    parser.add_argument("--force",
+        help="Force overwrite of existing output file",
         action='store_true'
     )
     parser.add_argument("--verbose",
@@ -215,7 +215,7 @@ def main():
             print("ERROR - input file: '" + args.inputfile + "' does not exist.")
             sys.exit(2) # ENOENT
         if os.path.isfile(args.csvfile):
-            if not args.forcemode:
+            if not args.force:
                 print("ERROR - output file: '" + args.csvfile + "' already exists.")
                 sys.exit(2)  # ENOENT
             else:
@@ -232,7 +232,7 @@ def main():
             print("ERROR - current license file: '" + args.current + "' does not exist.")
             sys.exit(2) # ENOENT
         if os.path.isfile(args.changefile):
-            if not args.forcemode:
+            if not args.force:
                 print("ERROR - output file: '" + args.changefile + "' already exists.")
                 sys.exit(2)  # ENOENT
             else:
