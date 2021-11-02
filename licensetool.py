@@ -23,7 +23,6 @@ import os
 import logging
 import argparse
 import re
-import tempfile
 import pandas as pd
 
 def _print_help():
@@ -65,18 +64,19 @@ def read_manifest_file(input_file):
 
     """Read manifest file and return a Panda's dataframe ."""
 
-    pattern = re.compile("PACKAGE NAME: (.*)\nPACKAGE VERSION: (.*)\nRECIPE NAME: (.*)\nLICENSE: (.*)\n\n")
+    pattern = re.compile("PACKAGE NAME: (.*)\nPACKAGE VERSION: (.*)\nRECIPE NAME: (.*)\n"
+                         "LICENSE: (.*)\n\n")
     f_h = open(input_file, "r", encoding='utf8')
     data = f_h.read()
     # Create empty dataframe
     column_names = ["package", "version", "recipe", "license"]
     d_f = pd.DataFrame(columns=column_names)
 
-    packageCount = 0
+    package_count = 0
     errors = False
     prew = 0
     for info_field in re.finditer(pattern, data):
-        packageCount+=1
+        package_count+=1
         if info_field.span()[0] != prew:
             print("Invalid content in the file")
             errors = True # there is some content not matching the pattern in file.
@@ -88,7 +88,7 @@ def read_manifest_file(input_file):
                 column_names[3]: info_field.group(4)}
         d_f = d_f.append(new_row, ignore_index=True)
 
-    if packageCount == 0: # needs to have at least one package or it is an error
+    if package_count == 0: # needs to have at least one package or it is an error
         print("Package count is zero")
         errors = True
 
@@ -99,7 +99,7 @@ def read_manifest_file(input_file):
         errors = True
 
     num_lines = sum(1 for line in data.split("\n"))
-    status = {"lines": num_lines, "packages": packageCount, "errors": errors}
+    status = {"lines": num_lines, "packages": package_count, "errors": errors}
     return d_f, status
 
 # _csv - generate CSV-file from a license manifest file
@@ -126,48 +126,20 @@ def _changes(previous, current, output):
 
     logging.debug("_changes: '%s', '%s', '%s'", previous, current, output)
     d_f_prev, status_prev = read_manifest_file(previous)
+    d_f_prev.rename(columns={"version":"prev_ver", "license":"prev_license", "recipe":"prev_recipe"}, inplace=True)
     if status_prev["errors"] is True:
         print("ERROR - handling of '" + previous + "' failed.")
         sys.exit(71) # EPROTO
+
     d_f_curr, status_curr = read_manifest_file(current)
+    d_f_curr.rename(columns={"version":"curr_ver", "license":"curr_license", "recipe":"curr_recipe"}, inplace=True)
     if status_curr["errors"] is True:
         print("ERROR - handling of '" + current + "' failed.")
         sys.exit(71) # EPROTO
 
-    f_orig = tempfile.TemporaryFile()
-    f_new = tempfile.TemporaryFile()
-    #f_orig = open(output+"orig_csv.temp.csv", "w+")
-    #f_new = open(output+"new_csv.temp.csv", "w+")
-
-    output_file = open(output, "w", encoding="utf-8")
-    d_f_prev.to_csv(f_orig, index=False)
-    d_f_curr.to_csv(f_new, index=False)
-
-    orig_csv = f_orig.readlines()
-    new_csv = f_new.readlines()
-    f_orig.close()
-    f_new.close()
-
-    first = True
-    for line in new_csv:
-        if line.strip():
-            if line not in orig_csv:
-                if first:
-                    print("Changes in Modules (Not found in original eg. added or changes)")
-                    first = False
-                print(line.strip())
-                output_file.write("new has,"+line)
-
-    first = True
-    for line in orig_csv:
-        if line.strip():
-            if line not in new_csv:
-                if first:
-                    print("\n")
-                    print("Changes in Modules (Not found in new eg. removed or changes)")
-                    first = False
-                print(line.strip())
-                output_file.write("old has,"+line)
+    d_f_combo = pd.merge(d_f_prev, d_f_curr, on = "package", how = "outer")
+    logging.debug(d_f_combo)
+    d_f_combo.to_csv(output, index=False)
 
 def _parse_args():
 
@@ -236,7 +208,7 @@ def main():
                 print("ERROR - output file: '" + args.csvfile + "' already exists.")
                 sys.exit(2)  # ENOENT
             else:
-                print("Warning - output file: '" + args.csvfile + "' already exists. Will overwrite")
+                print("Warning - output file: '" + args.csvfile + "' already exists. Will overwrite.")
 
         _csv(args.inputfile, args.csvfile)
 
@@ -252,7 +224,7 @@ def main():
                 print("ERROR - output file: '" + args.changefile + "' already exists.")
                 sys.exit(2)  # ENOENT
             else:
-                print("Warning - output file: '" + args.changefile + "' already exists. Will overwrite")
+                print("Warning - output file: '" + args.changefile + "' already exists. Will overwrite.")
 
         _changes(args.previous, args.current, args.changefile)
 
