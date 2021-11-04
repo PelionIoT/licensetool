@@ -50,12 +50,6 @@ def test_invalid_current(tmpdir):
     assert ret != 0
 
 # Success case
-def test_changes_3packages_v2(tmpdir):
-    tmp_outfile = str(tmpdir.join("out"))
-    ret = os.system("python licensetool.py changes tests/3-packages.manifest tests/3-packages.manifest.v2 " + tmp_outfile )
-    assert ret == 0
-
-# Success case
 def test_changes_v1_v2(tmpdir):
     tmp_outfile = str(tmpdir.join("out"))
     ret = os.system("python licensetool.py changes tests/changes-test.v1 tests/changes-test.v2 " + tmp_outfile )
