@@ -155,35 +155,57 @@ def _changes(previous, current, output):
         if pd.isna(d_f_combo.at[i, "prev_recipe"]): # NaN
             d_f_combo.at[i, "change"] = "y"
             d_f_combo.at[i, "package_change"] = "new package"
-            styled = styled.apply(style_single_cell, row=i, colum=d_f_combo.columns.get_loc("curr_recipe"), color="yellow", axis=None)
-            styled = styled.apply(style_single_cell, row=i, colum=d_f_combo.columns.get_loc("package"), color="yellow", axis=None)
-            styled = styled.apply(style_single_cell, row=i, colum=d_f_combo.columns.get_loc("curr_ver"), color="yellow", axis=None)
-            styled = styled.apply(style_single_cell, row=i, colum=d_f_combo.columns.get_loc("curr_license"), color="yellow", axis=None)
+            styled = styled.apply(style_single_cell, row=i,
+                colum=d_f_combo.columns.get_loc("curr_recipe"),
+                color="yellow", axis=None)
+            styled = styled.apply(style_single_cell, row=i,
+                colum=d_f_combo.columns.get_loc("package"),
+                color="yellow", axis=None)
+            styled = styled.apply(style_single_cell, row=i,
+                colum=d_f_combo.columns.get_loc("curr_ver"),
+                color="yellow", axis=None)
+            styled = styled.apply(style_single_cell, row=i,
+                colum=d_f_combo.columns.get_loc("curr_license"),
+                color="yellow", axis=None)
             package_change = True
         # Package removed
         if package_change is False and pd.isna(d_f_combo.at[i, "curr_recipe"]): # NaN
             d_f_combo.at[i, "change"] = "y"
             d_f_combo.at[i, "package_change"] = "dropped package"
-            styled = styled.apply(style_single_cell, row=i, colum=d_f_combo.columns.get_loc("prev_recipe"), color="yellow", axis=None)
-            styled = styled.apply(style_single_cell, row=i, colum=d_f_combo.columns.get_loc("prev_ver"), color="yellow", axis=None)
-            styled = styled.apply(style_single_cell, row=i, colum=d_f_combo.columns.get_loc("package"), color="yellow", axis=None)
-            styled = styled.apply(style_single_cell, row=i, colum=d_f_combo.columns.get_loc("prev_license"), color="yellow", axis=None)
-
+            styled = styled.apply(style_single_cell, row=i,
+                colum=d_f_combo.columns.get_loc("prev_recipe"),
+                color="yellow", axis=None)
+            styled = styled.apply(style_single_cell, row=i,
+                colum=d_f_combo.columns.get_loc("prev_ver"),
+                color="yellow", axis=None)
+            styled = styled.apply(style_single_cell, row=i,
+                colum=d_f_combo.columns.get_loc("package"),
+                color="yellow", axis=None)
+            styled = styled.apply(style_single_cell, row=i,
+                colum=d_f_combo.columns.get_loc("prev_license"),
+                color="yellow", axis=None)
             package_change = True
         # Version change
         if package_change is False and d_f_combo.at[i, "prev_ver"] != d_f_combo.at[i, "curr_ver"]:
             d_f_combo.at[i, "change"] = "y"
             d_f_combo.at[i, "version_change"] = "y"
-
-            styled = styled.apply(style_single_cell, row=i, colum=d_f_combo.columns.get_loc("prev_ver"), color="lightgreen", axis=None)
-            styled = styled.apply(style_single_cell, row=i, colum=d_f_combo.columns.get_loc("curr_ver"), color="lightgreen", axis=None)
+            styled = styled.apply(style_single_cell, row=i,
+                colum=d_f_combo.columns.get_loc("prev_ver"),
+                color="lightgreen", axis=None)
+            styled = styled.apply(style_single_cell, row=i,
+                colum=d_f_combo.columns.get_loc("curr_ver"),
+                color="lightgreen", axis=None)
         # License change
         if package_change is False and \
            d_f_combo.at[i, "prev_license"] != d_f_combo.at[i, "curr_license"]:
             d_f_combo.at[i, "change"] = "y"
             d_f_combo.at[i, "license_change"] = "y"
-            styled = styled.apply(style_single_cell, row=i, colum=d_f_combo.columns.get_loc("prev_license"), color="red", axis=None)
-            styled = styled.apply(style_single_cell, row=i, colum=d_f_combo.columns.get_loc("curr_license"), color="red", axis=None)
+            styled = styled.apply(style_single_cell, row=i,
+                colum=d_f_combo.columns.get_loc("prev_license"),
+                color="red", axis=None)
+            styled = styled.apply(style_single_cell, row=i,
+                colum=d_f_combo.columns.get_loc("curr_license"),
+                color="red", axis=None)
         # No changes cases is the default, as we set all change columns to n at start
         i = i + 1
     # Export result out
