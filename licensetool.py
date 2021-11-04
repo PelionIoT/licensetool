@@ -65,7 +65,8 @@ def read_manifest_file(input_file):
         for info_field in re.finditer(pattern, data):
             package_count+=1
             if info_field.span()[0] != prew:
-                print("Invalid content in the file")
+                print("ERROR - Invalid content in the file, got " + str(package_count)
+                      + " packages.")
                 errors = True # there is some content not matching the pattern in file.
             prew = info_field.span()[1]
 
@@ -82,7 +83,8 @@ def read_manifest_file(input_file):
         data_len = len(data)
         if data_len != prew:
             # if not all data was matched it is an error
-            print("Invalid content at end of file")
+            print("ERROR - Invalid content at end of file, got " + str(package_count)
+                   + " packages.")
             errors = True
 
         num_lines = sum(1 for line in data.split("\n"))
@@ -130,8 +132,42 @@ def _changes(previous, current, output):
         print("ERROR - handling of '" + current + "' failed.")
         sys.exit(71) # EPROTO
 
+    # 1st create a merged table that has both previous and current information
     d_f_combo = pd.merge(d_f_prev, d_f_curr, on = "package", how = "outer")
     logging.debug(d_f_combo)
+
+    # With that, we can now start going it through and add the "changes" columns
+    # to highlight what has changed.
+    # Not going to consider recipe change a change worth high-lighting, that is not relevant from
+    # Third Party IP point of view.
+
+    d_f_combo[["change", "version_change","license_change","package_change"]] = "n"
+    i = 0
+    rows = d_f_combo.shape[0]
+    while i < rows:
+        # Check package appearing, start by setting change is "n"
+        package_change = False
+        if pd.isna(d_f_combo.at[i, "prev_recipe"]): # NaN
+            d_f_combo.at[i, "change"] = "y"
+            d_f_combo.at[i, "package_change"] = "new package"
+            package_change = True
+        # Package removed
+        if package_change is False and pd.isna(d_f_combo.at[i, "curr_recipe"]): # NaN
+            d_f_combo.at[i, "change"] = "y"
+            d_f_combo.at[i, "package_change"] = "dropped package"
+            package_change = True
+        # Version change
+        if package_change is False and d_f_combo.at[i, "prev_ver"] != d_f_combo.at[i, "curr_ver"]:
+            d_f_combo.at[i, "change"] = "y"
+            d_f_combo.at[i, "version_change"] = "y"
+        # License change
+        if package_change is False and \
+           d_f_combo.at[i, "prev_license"] != d_f_combo.at[i, "curr_license"]:
+            d_f_combo.at[i, "change"] = "y"
+            d_f_combo.at[i, "license_change"] = "y"
+        # No changes cases is the default, as we set all change columns to n at start
+        i = i + 1
+    # Export result out
     d_f_combo.to_csv(output, index=False)
 
 def _parse_args():

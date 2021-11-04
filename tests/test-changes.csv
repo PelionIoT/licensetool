@@ -1,0 +1,7 @@
+package,prev_ver,prev_recipe,prev_license,curr_ver,curr_recipe,curr_license,change,version_change,license_change,package_change
+no-changes,1.0.0,no-changes,GPLv2+,1.0.0,no-changes,GPLv2+,n,n,n,n
+changes-version,1.1.1,changes-version,LGPLv2.1+ & GPLv2+,2.2.2-changed,changes-version,LGPLv2.1+ & GPLv2+,y,y,n,n
+changes-license,1.0+gitAUTOINC+dad22588d7,changes-license,MPL-2.0,1.0+gitAUTOINC+dad22588d7,changes-license,MIT-CHANGED,y,n,y,n
+changes-license-ver,2.0.0,changes-license-ver,Apache-2.0,3.2.1-changed,changes-license,MIT-changed,y,y,y,n
+packagedropped,2.0.0,packagedropped,MIT,,,,y,n,n,dropped package
+new-package,,,,0.0.1,new-package,Apache-2.0,y,n,n,new package
