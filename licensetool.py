@@ -35,10 +35,11 @@ def _print_help():
     print("")
     print("license-tool.py changes --previous <manifest file> --current <manifest file> "
           "--output <CVS file>")
-    print("   Generate a CVS-formatted version based on two Yocto manifest files that"
+    print("   Generate a CVS and Excel-formatted version based on two Yocto manifest files that"
           " highlights the changes")
-    print("   For example license-tool.py changes license.manifest.v83 license.manifest.v83 "
-          "license-chanages.cvs")
+    print("   For example license-tool.py changes license.manifest.v82 license.manifest.v83 "
+          "license-changes-v82-v83")
+    print("   Will generate license-changes-v82-v83.csv and license-changes-v82-v83.xlsx files.")
     print("")
     print("Optional:")
     print(" --verbose   verbose output")
@@ -186,9 +187,9 @@ def _changes(previous, current, output):
         # No changes cases is the default, as we set all change columns to n at start
         i = i + 1
     # Export result out
-    d_f_combo.to_csv(output, index=False)
+    d_f_combo.to_csv(output+".csv", index=False)
 
-    #add autofilters to excel sheet
+    # Add autofilters to Excel sheet
     writer = pd.ExcelWriter(output+".xlsx", engine='openpyxl')
     styled.to_excel(writer, sheet_name='Sheet1', index=False)
     # Get the xlsxwriter workbook and worksheet objects.
