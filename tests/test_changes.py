@@ -54,3 +54,13 @@ def test_changes_3packages_v2(tmpdir):
     tmp_outfile = str(tmpdir.join("out.cvs"))
     ret = os.system("python licensetool.py changes tests/3-packages.manifest tests/3-packages.manifest.v2 " + tmp_outfile )
     assert ret == 0
+
+# Success case
+def test_changes_changes_v1_v2(tmpdir):
+    tmp_outfile = str(tmpdir.join("out.cvs"))
+    ret = os.system("python licensetool.py changes tests/changes-test.v1 tests/changes-test.v2 " + tmp_outfile )
+    assert ret == 0
+    # Compare result, too
+    ref_df = pd.read_csv("tests/test-changes.csv")
+    result_df = pd.read_csv(tmp_outfile)
+    assert result_df.equals(ref_df)
