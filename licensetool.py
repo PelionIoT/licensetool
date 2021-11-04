@@ -110,16 +110,6 @@ def _csv(inputfile, outputfile):
     print(inputfile + " " + str(status) )
 
 
-def highlight_cells(v, color):
-    # provide your criteria for highlighting the cells here
-    return "background-color: yellow"
-
-def highlight_cell(v, color):
-    # provide your criteria for highlighting the cells here
-    return "background-color: red"
-
-def highlight_cells2():
-    return ['background-color: yellow']
 # _changes - generate change information based on two Yocto license manifest files
 #
 def _changes(previous, current, output):
