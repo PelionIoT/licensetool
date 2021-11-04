@@ -64,3 +64,6 @@ def test_changes_v1_v2(tmpdir):
     ref_df = pd.read_csv("tests/test-changes.csv")
     result_df = pd.read_csv(tmp_outfile+".csv")
     assert result_df.equals(ref_df)
+    # Also the Excel-version
+    xl_result_df = pd.read_excel(tmp_outfile+".xlsx",  engine='openpyxl')
+    assert xl_result_df.equals(ref_df)
