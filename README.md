@@ -50,7 +50,7 @@ This will generate two output files,
 ## Tests
 
 Tests and test material are located in [tests](tests)-folder.
-You can them from the root folder:
+You can run them from the root folder:
 
 ```
 pytest --cov=licensetool --cov-report term-missing tests/
