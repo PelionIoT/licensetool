@@ -134,8 +134,6 @@ def _changes(previous, current, output):
         print("ERROR - handling of '" + current + "' failed.")
         sys.exit(71) # EPROTO
 
-
-
     # 1st create a merged table that has both previous and current information
     d_f_combo = pd.merge(d_f_prev, d_f_curr, on = "package", how = "outer")
     logging.debug(d_f_combo)
@@ -156,16 +154,16 @@ def _changes(previous, current, output):
             d_f_combo.at[i, "change"] = "y"
             d_f_combo.at[i, "package_change"] = "new package"
             styled = styled.apply(style_single_cell, row=i,
-                colum=d_f_combo.columns.get_loc("curr_recipe"),
+                column=d_f_combo.columns.get_loc("curr_recipe"),
                 color="yellow", axis=None)
             styled = styled.apply(style_single_cell, row=i,
-                colum=d_f_combo.columns.get_loc("package"),
+                column=d_f_combo.columns.get_loc("package"),
                 color="yellow", axis=None)
             styled = styled.apply(style_single_cell, row=i,
-                colum=d_f_combo.columns.get_loc("curr_ver"),
+                column=d_f_combo.columns.get_loc("curr_ver"),
                 color="yellow", axis=None)
             styled = styled.apply(style_single_cell, row=i,
-                colum=d_f_combo.columns.get_loc("curr_license"),
+                column=d_f_combo.columns.get_loc("curr_license"),
                 color="yellow", axis=None)
             package_change = True
         # Package removed
@@ -173,16 +171,16 @@ def _changes(previous, current, output):
             d_f_combo.at[i, "change"] = "y"
             d_f_combo.at[i, "package_change"] = "dropped package"
             styled = styled.apply(style_single_cell, row=i,
-                colum=d_f_combo.columns.get_loc("prev_recipe"),
+                column=d_f_combo.columns.get_loc("prev_recipe"),
                 color="yellow", axis=None)
             styled = styled.apply(style_single_cell, row=i,
-                colum=d_f_combo.columns.get_loc("prev_ver"),
+                column=d_f_combo.columns.get_loc("prev_ver"),
                 color="yellow", axis=None)
             styled = styled.apply(style_single_cell, row=i,
-                colum=d_f_combo.columns.get_loc("package"),
+                column=d_f_combo.columns.get_loc("package"),
                 color="yellow", axis=None)
             styled = styled.apply(style_single_cell, row=i,
-                colum=d_f_combo.columns.get_loc("prev_license"),
+                column=d_f_combo.columns.get_loc("prev_license"),
                 color="yellow", axis=None)
             package_change = True
         # Version change
@@ -190,21 +188,21 @@ def _changes(previous, current, output):
             d_f_combo.at[i, "change"] = "y"
             d_f_combo.at[i, "version_change"] = "y"
             styled = styled.apply(style_single_cell, row=i,
-                colum=d_f_combo.columns.get_loc("prev_ver"),
-                color="lightgreen", axis=None)
+                column=d_f_combo.columns.get_loc("prev_ver"),
+                color="green", axis=None)
             styled = styled.apply(style_single_cell, row=i,
-                colum=d_f_combo.columns.get_loc("curr_ver"),
-                color="lightgreen", axis=None)
+                column=d_f_combo.columns.get_loc("curr_ver"),
+                color="green", axis=None)
         # License change
         if package_change is False and \
            d_f_combo.at[i, "prev_license"] != d_f_combo.at[i, "curr_license"]:
             d_f_combo.at[i, "change"] = "y"
             d_f_combo.at[i, "license_change"] = "y"
             styled = styled.apply(style_single_cell, row=i,
-                colum=d_f_combo.columns.get_loc("prev_license"),
+                column=d_f_combo.columns.get_loc("prev_license"),
                 color="red", axis=None)
             styled = styled.apply(style_single_cell, row=i,
-                colum=d_f_combo.columns.get_loc("curr_license"),
+                column=d_f_combo.columns.get_loc("curr_license"),
                 color="red", axis=None)
         # No changes cases is the default, as we set all change columns to n at start
         i = i + 1
@@ -212,20 +210,24 @@ def _changes(previous, current, output):
     d_f_combo.to_csv(output+".csv", index=False)
 
     # Add autofilters to Excel sheet
-    writer = pd.ExcelWriter(output+".xlsx", engine='openpyxl')
-    styled.to_excel(writer, sheet_name='Sheet1', index=False)
-    # Get the xlsxwriter workbook and worksheet objects.
-    workbook = writer.book
-    ws = workbook.active
-    ws.auto_filter.ref = ws.dimensions
-    writer.save()
-    #styled.to_excel(output+".xlsx", engine='openpyxl', index=False)
+    with pd.ExcelWriter(output+".xlsx", engine='openpyxl') as writer:
+        styled.to_excel(writer, sheet_name='Sheet1', index=False)
+        # Get the xlsxwriter workbook and worksheet objects.
+        workbook = writer.book
+        work_sheet = workbook.active
+        work_sheet.auto_filter.ref = work_sheet.dimensions
+        writer.save()
 
+#
+# style_single_cell - set background color on a cell
+#
+def style_single_cell(work_sheet, row, column, color):
 
-def style_single_cell(x, row, colum, color):
-    new_color = 'background-color:  %s' % color
-    df1 = pd.DataFrame('', index=x.index, columns=x.columns)
-    df1.iloc[row, colum] = new_color
+    """Set a single cell to a specific color."""
+
+    new_color = f"background-color:  {color}"
+    df1 = pd.DataFrame('', index=work_sheet.index, columns=work_sheet.columns)
+    df1.iloc[row, column] = new_color
     return df1
 
 
