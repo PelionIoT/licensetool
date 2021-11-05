@@ -210,14 +210,13 @@ def _changes(previous, current, output):
     d_f_combo.to_csv(output+".csv", index=False)
 
     # Add autofilters to Excel sheet
-    # https://github.com/PyCQA/pylint/issues/3060 see for pylint issue with abstract class....
-    with pd.ExcelWriter(output+".xlsx", engine='openpyxl') as writer: # pylint: disable=abstract-class-instantiated
-        styled.to_excel(writer, sheet_name='Sheet1', index=False)
-        # Get the xlsxwriter workbook and worksheet objects.
-        workbook = writer.book
-        work_sheet = workbook.active
-        work_sheet.auto_filter.ref = work_sheet.dimensions
-        writer.save()
+    writer = pd.ExcelWriter(output+".xlsx", engine='openpyxl') # pylint: disable=abstract-class-instantiated
+    styled.to_excel(writer, sheet_name='Sheet1', index=False)
+    # Get the xlsxwriter workbook and worksheet objects.
+    workbook = writer.book
+    worksheet = workbook.active
+    worksheet.auto_filter.ref = worksheet.dimensions
+    writer.save()
 
 #
 # style_single_cell - set background color on a cell
