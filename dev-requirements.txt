@@ -7,4 +7,3 @@ pycodestyle
 coverage
 wheel
 bandit
-

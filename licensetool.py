@@ -35,10 +35,11 @@ def _print_help():
     print("")
     print("license-tool.py changes --previous <manifest file> --current <manifest file> "
           "--output <CVS file>")
-    print("   Generate a CVS-formatted version based on two Yocto manifest files that"
+    print("   Generate a CVS and Excel-formatted version based on two Yocto manifest files that"
           " highlights the changes")
-    print("   For example license-tool.py changes license.manifest.v83 license.manifest.v83 "
-          "license-chanages.cvs")
+    print("   For example license-tool.py changes license.manifest.v82 license.manifest.v83 "
+          "license-changes-v82-v83")
+    print("   Will generate license-changes-v82-v83.csv and license-changes-v82-v83.xlsx files.")
     print("")
     print("Optional:")
     print(" --verbose   verbose output")
@@ -103,11 +104,13 @@ def _csv(inputfile, outputfile):
 
     # Export CSV, if no errors noticed
     if status["errors"] is False:
-        d_f.to_csv(outputfile, index=False)
+        d_f.to_csv(outputfile+".csv", index=False)
+        generate_excel(outputfile+".xlsx", d_f.style)
     else:
         print("ERROR - could not process license manifest file " + inputfile)
         sys.exit(71) # EPROTO
     print(inputfile + " " + str(status) )
+
 
 # _changes - generate change information based on two Yocto license manifest files
 #
@@ -141,34 +144,95 @@ def _changes(previous, current, output):
     # Not going to consider recipe change a change worth high-lighting, that is not relevant from
     # Third Party IP point of view.
 
-    d_f_combo[["change", "version_change","license_change","package_change"]] = "n"
+    d_f_combo[["change", "version_change","license_change","package_add", "package_removed"]] = ""
     i = 0
     rows = d_f_combo.shape[0]
+    styled = d_f_combo.style
     while i < rows:
         # Check package appearing, start by setting change is "n"
         package_change = False
         if pd.isna(d_f_combo.at[i, "prev_recipe"]): # NaN
             d_f_combo.at[i, "change"] = "y"
-            d_f_combo.at[i, "package_change"] = "new package"
+            d_f_combo.at[i, "package_add"] = "y"
+            styled = styled.apply(style_single_cell, row=i,
+                column=d_f_combo.columns.get_loc("curr_recipe"),
+                color="yellow", axis=None)
+            styled = styled.apply(style_single_cell, row=i,
+                column=d_f_combo.columns.get_loc("package"),
+                color="yellow", axis=None)
+            styled = styled.apply(style_single_cell, row=i,
+                column=d_f_combo.columns.get_loc("curr_ver"),
+                color="yellow", axis=None)
+            styled = styled.apply(style_single_cell, row=i,
+                column=d_f_combo.columns.get_loc("curr_license"),
+                color="yellow", axis=None)
             package_change = True
         # Package removed
         if package_change is False and pd.isna(d_f_combo.at[i, "curr_recipe"]): # NaN
             d_f_combo.at[i, "change"] = "y"
-            d_f_combo.at[i, "package_change"] = "dropped package"
+            d_f_combo.at[i, "package_removed"] = "y"
+            styled = styled.apply(style_single_cell, row=i,
+                column=d_f_combo.columns.get_loc("prev_recipe"),
+                color="yellow", axis=None)
+            styled = styled.apply(style_single_cell, row=i,
+                column=d_f_combo.columns.get_loc("prev_ver"),
+                color="yellow", axis=None)
+            styled = styled.apply(style_single_cell, row=i,
+                column=d_f_combo.columns.get_loc("package"),
+                color="yellow", axis=None)
+            styled = styled.apply(style_single_cell, row=i,
+                column=d_f_combo.columns.get_loc("prev_license"),
+                color="yellow", axis=None)
             package_change = True
         # Version change
         if package_change is False and d_f_combo.at[i, "prev_ver"] != d_f_combo.at[i, "curr_ver"]:
             d_f_combo.at[i, "change"] = "y"
             d_f_combo.at[i, "version_change"] = "y"
+            styled = styled.apply(style_single_cell, row=i,
+                column=d_f_combo.columns.get_loc("prev_ver"),
+                color="green", axis=None)
+            styled = styled.apply(style_single_cell, row=i,
+                column=d_f_combo.columns.get_loc("curr_ver"),
+                color="green", axis=None)
         # License change
         if package_change is False and \
            d_f_combo.at[i, "prev_license"] != d_f_combo.at[i, "curr_license"]:
             d_f_combo.at[i, "change"] = "y"
             d_f_combo.at[i, "license_change"] = "y"
+            styled = styled.apply(style_single_cell, row=i,
+                column=d_f_combo.columns.get_loc("prev_license"),
+                color="red", axis=None)
+            styled = styled.apply(style_single_cell, row=i,
+                column=d_f_combo.columns.get_loc("curr_license"),
+                color="red", axis=None)
         # No changes cases is the default, as we set all change columns to n at start
         i = i + 1
     # Export result out
-    d_f_combo.to_csv(output, index=False)
+    d_f_combo.to_csv(path_or_buf=output+".csv", index=False)
+    generate_excel(output=output+".xlsx", styled=styled)
+
+def generate_excel(output, styled):
+    # Add autofilters to Excel sheet
+    writer = pd.ExcelWriter(output, engine='openpyxl') # pylint: disable=abstract-class-instantiated
+    styled.to_excel(writer, sheet_name='Sheet1', index=False)
+    # Get the xlsxwriter workbook and worksheet objects.
+    workbook = writer.book
+    worksheet = workbook.active
+    worksheet.auto_filter.ref = worksheet.dimensions
+    writer.save()
+
+#
+# style_single_cell - set background color on a cell
+#
+def style_single_cell(work_sheet, row, column, color):
+
+    """Set a single cell to a specific color."""
+
+    new_color = f"background-color:  {color}"
+    df1 = pd.DataFrame('', index=work_sheet.index, columns=work_sheet.columns)
+    df1.iloc[row, column] = new_color
+    return df1
+
 
 def _parse_args():
 

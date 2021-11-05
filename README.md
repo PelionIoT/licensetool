@@ -40,13 +40,17 @@ dev-init.sh
 
 ### Generate license changes file
 
-`python licensetool.py changes <previous manifest file> <current manifest file> <output CSV-file>`
+`python licensetool.py changes <previous manifest file> <current manifest file> <output file>`
 
+This will generate two output files,
+
+1. `<output file>.cvs` in plain CSV-format and
+1. `<output file>.xlsx` in Excel-format, which has some highlights and filters.
 
 ## Tests
 
 Tests and test material are located in [tests](tests)-folder.
-You can them from the root folder:
+You can run them from the root folder:
 
 ```
 pytest --cov=licensetool --cov-report term-missing tests/
