@@ -143,7 +143,7 @@ def _changes(previous, current, output):
     # Not going to consider recipe change a change worth high-lighting, that is not relevant from
     # Third Party IP point of view.
 
-    d_f_combo[["change", "version_change","license_change","package_change"]] = ""
+    d_f_combo[["change", "version_change","license_change","package_add", "package_removed"]] = ""
     i = 0
     rows = d_f_combo.shape[0]
     styled = d_f_combo.style
@@ -152,7 +152,7 @@ def _changes(previous, current, output):
         package_change = False
         if pd.isna(d_f_combo.at[i, "prev_recipe"]): # NaN
             d_f_combo.at[i, "change"] = "y"
-            d_f_combo.at[i, "package_change"] = "new package"
+            d_f_combo.at[i, "package_add"] = "y"
             styled = styled.apply(style_single_cell, row=i,
                 column=d_f_combo.columns.get_loc("curr_recipe"),
                 color="yellow", axis=None)
@@ -169,7 +169,7 @@ def _changes(previous, current, output):
         # Package removed
         if package_change is False and pd.isna(d_f_combo.at[i, "curr_recipe"]): # NaN
             d_f_combo.at[i, "change"] = "y"
-            d_f_combo.at[i, "package_change"] = "dropped package"
+            d_f_combo.at[i, "package_removed"] = "y"
             styled = styled.apply(style_single_cell, row=i,
                 column=d_f_combo.columns.get_loc("prev_recipe"),
                 color="yellow", axis=None)
