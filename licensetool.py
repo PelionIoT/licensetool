@@ -143,7 +143,7 @@ def _changes(previous, current, output):
     # Not going to consider recipe change a change worth high-lighting, that is not relevant from
     # Third Party IP point of view.
 
-    d_f_combo[["change", "version_change","license_change","package_change"]] = "n"
+    d_f_combo[["change", "version_change","license_change","package_change"]] = ""
     i = 0
     rows = d_f_combo.shape[0]
     styled = d_f_combo.style
