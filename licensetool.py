@@ -210,7 +210,8 @@ def _changes(previous, current, output):
     d_f_combo.to_csv(output+".csv", index=False)
 
     # Add autofilters to Excel sheet
-    with pd.ExcelWriter(output+".xlsx", engine='openpyxl') as writer:
+    # https://github.com/PyCQA/pylint/issues/3060 see for pylint issue with abstract class....
+    with pd.ExcelWriter(output+".xlsx", engine='openpyxl') as writer: # pylint: disable=abstract-class-instantiated
         styled.to_excel(writer, sheet_name='Sheet1', index=False)
         # Get the xlsxwriter workbook and worksheet objects.
         workbook = writer.book
