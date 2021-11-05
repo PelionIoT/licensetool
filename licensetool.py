@@ -104,7 +104,8 @@ def _csv(inputfile, outputfile):
 
     # Export CSV, if no errors noticed
     if status["errors"] is False:
-        d_f.to_csv(outputfile, index=False)
+        d_f.to_csv(outputfile+".csv", index=False)
+        generate_excel(outputfile+".xlsx", d_f.style)
     else:
         print("ERROR - could not process license manifest file " + inputfile)
         sys.exit(71) # EPROTO
@@ -207,10 +208,12 @@ def _changes(previous, current, output):
         # No changes cases is the default, as we set all change columns to n at start
         i = i + 1
     # Export result out
-    d_f_combo.to_csv(output+".csv", index=False)
+    d_f_combo.to_csv(path_or_buf=output+".csv", index=False)
+    generate_excel(output=output+".xlsx", styled=styled)
 
+def generate_excel(output, styled):
     # Add autofilters to Excel sheet
-    writer = pd.ExcelWriter(output+".xlsx", engine='openpyxl') # pylint: disable=abstract-class-instantiated
+    writer = pd.ExcelWriter(output, engine='openpyxl') # pylint: disable=abstract-class-instantiated
     styled.to_excel(writer, sheet_name='Sheet1', index=False)
     # Get the xlsxwriter workbook and worksheet objects.
     workbook = writer.book
