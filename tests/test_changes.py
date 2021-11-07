@@ -24,19 +24,24 @@ import licensetool as t
 
 # Test previous empty file
 def test_empty_license_prev(tmpdir):
-    tmp_outfile = str(tmpdir.join("out.cvs"))
-    ret = os.system("python licensetool.py changes tests/empty_file.manifest tests/3-packages.manifest.v2 " + tmp_outfile)
+    tmp_outfiles = str(tmpdir.join("out"))
+    ret = os.system("python licensetool.py changes tests/empty_file.manifest tests/3-packages.manifest.v2 " + tmp_outfiles)
     assert ret != 0
 
 # Test empty current file
 def test_empty_license_curr(tmpdir):
-    tmp_outfile = str(tmpdir.join("out.cvs"))
-    ret = os.system("python licensetool.py changes tests/3-packages.manifest tests/empty_file.manifest " + tmp_outfile)
+    tmp_outfiles = str(tmpdir.join("out"))
+    ret = os.system("python licensetool.py changes tests/3-packages.manifest tests/empty_file.manifest " + tmp_outfiles)
     assert ret != 0
 
 # If output file exists, it should refuse to overwrite
 def test_outfile_exists(tmpdir):
-    ret = os.system("python licensetool.py changes tests/3-packages.manifest tests/3-packages.manifest tests/empty_file.manifest")
+    tmp_outfiles = str(tmpdir.join("out"))
+    # 1st run - create the file out.xls
+    ret = os.system("python licensetool.py changes tests/3-packages.manifest tests/3-packages.manifest " + tmp_outfiles)
+    assert ret == 0
+    # 2nd run must fail, files now already exist (out.csv/out.xlsx)
+    ret = os.system("python licensetool.py changes tests/3-packages.manifest tests/3-packages.manifest " + tmp_outfiles)
     assert ret != 0
 
 # Invalid previous
@@ -51,13 +56,13 @@ def test_invalid_current(tmpdir):
 
 # Success case
 def test_changes_v1_v2(tmpdir):
-    tmp_outfile = str(tmpdir.join("out"))
-    ret = os.system("python licensetool.py changes tests/changes-test.v1 tests/changes-test.v2 " + tmp_outfile )
+    tmp_outfiles = str(tmpdir.join("out"))
+    ret = os.system("python licensetool.py changes tests/changes-test.v1 tests/changes-test.v2 " + tmp_outfiles )
     assert ret == 0
     # Compare result, too
     ref_df = pd.read_csv("tests/test-changes.csv")
-    result_df = pd.read_csv(tmp_outfile+".csv")
+    result_df = pd.read_csv(tmp_outfiles + ".csv")
     assert result_df.equals(ref_df)
     # Also the Excel-version
-    xl_result_df = pd.read_excel(tmp_outfile+".xlsx",  engine='openpyxl')
+    xl_result_df = pd.read_excel(tmp_outfiles + ".xlsx",  engine='openpyxl')
     assert xl_result_df.equals(ref_df)
