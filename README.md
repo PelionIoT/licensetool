@@ -36,7 +36,12 @@ dev-init.sh
 
 ### Generate CSV-formatted license file
 
-`python licensetool.py csv <input manifest file> <output CSV-file>`
+`python licensetool.py csv <input manifest file> <output>`
+
+This will generate two output files,
+
+1. `<output file>.cvs` in plain CSV-format and
+1. `<output file>.xlsx` in Excel-format.
 
 ### Generate license changes file
 

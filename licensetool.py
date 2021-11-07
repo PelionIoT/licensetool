@@ -29,13 +29,14 @@ def _print_help():
 
     print("Yocto license manifest tool")
     print("")
-    print("license-tool.py cvs --input <license manifest file> --output <CVS file> ")
-    print("   Generate a CVS-formatted version of the Yocto manifest file")
-    print("   For example license-tool.py cvs license.manifest licenses.cvs ")
+    print("license-tool.py csv --input <license manifest file> --output <output file> ")
+    print("   Generate a CSV-formatted version of the Yocto manifest file")
+    print("   For example license-tool.py csv license.manifest licenses ")
+    print("   Will generate licenses.csv and licenses.xlsx files.")
     print("")
     print("license-tool.py changes --previous <manifest file> --current <manifest file> "
-          "--output <CVS file>")
-    print("   Generate a CVS and Excel-formatted version based on two Yocto manifest files that"
+          "--output <CSV file>")
+    print("   Generate a CSV and Excel-formatted version based on two Yocto manifest files that"
           " highlights the changes")
     print("   For example license-tool.py changes license.manifest.v82 license.manifest.v83 "
           "license-changes-v82-v83")
@@ -242,7 +243,7 @@ def _parse_args():
 
     subparsers = parser.add_subparsers(dest="command")
     parser_csv = subparsers.add_parser("csv",
-        help="create CVS file of Yocto License manifest file.")
+        help="create CSV file of Yocto License manifest file.")
     parser_csv.add_argument(
         "inputfile",
         help="Yocto license manifest file name (used as input)",
