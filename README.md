@@ -36,7 +36,12 @@ dev-init.sh
 
 ### Generate CSV-formatted license file
 
-`python licensetool.py csv <input manifest file> <output CSV-file>`
+`python licensetool.py csv <input manifest file> <output>`
+
+This will generate two output files,
+
+1. `<output file>.cvs` in plain CSV-format and
+1. `<output file>.xlsx` in Excel-format.
 
 ### Generate license changes file
 
@@ -46,6 +51,10 @@ This will generate two output files,
 
 1. `<output file>.cvs` in plain CSV-format and
 1. `<output file>.xlsx` in Excel-format, which has some highlights and filters.
+
+### Other options
+
+Run the tool with `python licensetool.py` to get information on optional parameters.
 
 ## Tests
 
@@ -60,6 +69,7 @@ pytest --cov=licensetool --cov-report term-missing tests/
 
 All contributions must be done with compliance to Apache 2.0 license.
 All contributions must pass:
+- Clear written statement that author agrees to Apache 2.0 license and is the original author of the changes.
 - Code review, so submit a pull request (PR).
 - Run `pylint licensetool.py` and make sure the score does not get worse (9.82 now).
 - Include necessary test case updates, so that coverage does not decrease - provide evidence in the PR.

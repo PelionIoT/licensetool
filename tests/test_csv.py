@@ -17,6 +17,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
 import pytest
 import pandas as pd
 import licensetool as t
@@ -67,6 +68,20 @@ def test_3_packages():
     assert df.empty == False
     ref_df = pd.read_csv("tests/3-packages.csv")
     assert df.equals(ref_df)
+
+# Test a known successfull cases, with 3 packages only - via cli
+# so that we can verify also the xlsx -version.
+def test_3_packages_cli(tmpdir):
+    # Also via cli for the Excel-version, too
+    tmp_outfile = str(tmpdir.join("out"))
+    ret = os.system("python licensetool.py csv tests/3-packages.manifest " + tmp_outfile )
+    assert ret == 0
+    # Compare result, too
+    ref_df = pd.read_csv("tests/3-packages.csv")
+    result_df = pd.read_csv(tmp_outfile+".csv")
+    # Also the Excel-version
+    xl_result_df = pd.read_excel(tmp_outfile+".xlsx",  engine='openpyxl')
+    assert xl_result_df.equals(ref_df)
 
 # No empty lines at the end eg. broken package
 def test_3_packages_noemptylines():

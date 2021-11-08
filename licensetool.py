@@ -29,13 +29,14 @@ def _print_help():
 
     print("Yocto license manifest tool")
     print("")
-    print("license-tool.py cvs --input <license manifest file> --output <CVS file> ")
-    print("   Generate a CVS-formatted version of the Yocto manifest file")
-    print("   For example license-tool.py cvs license.manifest licenses.cvs ")
+    print("license-tool.py csv <input license manifest file> <output file>")
+    print("   Generate a CSV-formatted version of the Yocto manifest file")
+    print("   For example license-tool.py csv license.manifest licenses ")
+    print("   Will generate licenses.csv and licenses.xlsx files.")
     print("")
-    print("license-tool.py changes --previous <manifest file> --current <manifest file> "
-          "--output <CVS file>")
-    print("   Generate a CVS and Excel-formatted version based on two Yocto manifest files that"
+    print("license-tool.py changes <previous manifest file> <current manifest file> "
+          "<output file>")
+    print("   Generate a CSV and Excel-formatted version based on two Yocto manifest files that"
           " highlights the changes")
     print("   For example license-tool.py changes license.manifest.v82 license.manifest.v83 "
           "license-changes-v82-v83")
@@ -43,7 +44,8 @@ def _print_help():
     print("")
     print("Optional:")
     print(" --verbose   verbose output")
-    print(" --debug     debug level output (warning, a lot!)")
+    print(" --debug     debug level output")
+    print(" --force     enable overwriting of existing output files")
 
 # read_manifest_file - read Yocto license manifest and turn into a Panda's dataframe
 #                         and a status dictionary.
@@ -242,7 +244,7 @@ def _parse_args():
 
     subparsers = parser.add_subparsers(dest="command")
     parser_csv = subparsers.add_parser("csv",
-        help="create CVS file of Yocto License manifest file.")
+        help="create CSV file of Yocto License manifest file.")
     parser_csv.add_argument(
         "inputfile",
         help="Yocto license manifest file name (used as input)",
@@ -301,12 +303,12 @@ def main():
         if not os.path.isfile(args.inputfile):
             print("ERROR - input file: '" + args.inputfile + "' does not exist.")
             sys.exit(2) # ENOENT
-        if os.path.isfile(args.csvfile):
+        if os.path.isfile(args.csvfile+".csv") or os.path.isfile(args.csvfile+".xlsx"):
             if not args.force:
-                print("ERROR - output file: '" + args.csvfile + "' already exists.")
+                print("ERROR - output file: '" + args.csvfile + "'.csv or .xlsx already exists.")
                 sys.exit(2)  # ENOENT
             else:
-                print("Warning - output file: '" + args.csvfile + "' already exists. "
+                print("Warning - output file: '" + args.csvfile + "'.csv or .xlsx already exists. "
                     "Will overwrite.")
 
         _csv(args.inputfile, args.csvfile)
@@ -318,9 +320,9 @@ def main():
         if not os.path.isfile(args.current):
             print("ERROR - current license file: '" + args.current + "' does not exist.")
             sys.exit(2) # ENOENT
-        if os.path.isfile(args.changefile):
+        if os.path.isfile(args.changefile+".csv") or os.path.isfile(args.changefile+".xlsx"):
             if not args.force:
-                print("ERROR - output file: '" + args.changefile + "' already exists.")
+                print("ERROR - output file: '" + args.changefile + "'.csv or .xlsx already exists.")
                 sys.exit(2)  # ENOENT
             else:
                 print("Warning - output file: '" + args.changefile + "' already exists. "
