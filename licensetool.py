@@ -213,7 +213,13 @@ def _changes(previous, current, output):
     d_f_combo.to_csv(path_or_buf=output+".csv", index=False)
     generate_excel(output=output+".xlsx", styled=styled)
 
+#
+# generate_excel   output = output filename,
+#                  styled = styled Pandas dataframe
+#
 def generate_excel(output, styled):
+    """Generate Excel-file (output) from styled Panda's dataframe."""
+
     # Add autofilters to Excel sheet
     writer = pd.ExcelWriter(output, engine='openpyxl') # pylint: disable=abstract-class-instantiated
     styled.to_excel(writer, sheet_name='Sheet1', index=False)
