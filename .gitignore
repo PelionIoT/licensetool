@@ -6,6 +6,7 @@
 .xlsx
 .xlsm
 .xlsb
+.ods
 
 # Temporary / backup files
 .bak
