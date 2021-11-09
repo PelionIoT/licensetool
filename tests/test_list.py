@@ -74,7 +74,7 @@ def test_3_packages():
 def test_3_packages_cli(tmpdir):
     # Also via cli for the Excel-version, too
     tmp_outfile = str(tmpdir.join("out"))
-    ret = os.system("python licensetool.py csv tests/3-packages.manifest " + tmp_outfile )
+    ret = os.system("python licensetool.py list tests/3-packages.manifest " + tmp_outfile )
     assert ret == 0
     # Compare result, too
     ref_df = pd.read_csv("tests/3-packages.csv")

@@ -25,57 +25,65 @@ def test_no_params():
     ret = os.system("python licensetool.py")
     assert ret == 0
 
-def test_csv_only():
-    ret = os.system("python licensetool.py csv")
+def test_list_only():
+    ret = os.system("python licensetool.py list")
     assert ret != 0
 
-def test_csv_non_valid_option():
-    ret = os.system("python licensetool.py csv --abba")
+def test_list_non_valid_option():
+    ret = os.system("python licensetool.py list --nonvalidoption")
     assert ret != 0
 
-def test_csv_input_only():
-    ret = os.system("python licensetool.py csv tests/3-packages.manifest")
+def test_list_input_only():
+    ret = os.system("python licensetool.py list tests/3-packages.manifest")
     assert ret != 0
 
-def test_csv_input_output(tmpdir):
-    tmp_outfile = str(tmpdir.join("out.csv"))
-    ret = os.system("python licensetool.py csv tests/3-packages.manifest " + tmp_outfile)
+def test_list_input_output(tmpdir):
+    tmp_outfilebase = str(tmpdir.join("out"))
+    ret = os.system("python licensetool.py list tests/3-packages.manifest " + tmp_outfilebase)
     assert ret == 0
 
-def test_csv_forced_overwrite(tmpdir):
-    tmp_outfile = str(tmpdir.join("out"))
-    ret = os.system("python licensetool.py csv tests/3-packages.manifest " + tmp_outfile)
+def test_list_forced_overwrite(tmpdir):
+    tmp_outfilebase = str(tmpdir.join("out"))
+    ret = os.system("python licensetool.py list tests/3-packages.manifest " + tmp_outfilebase)
     # This creates now out.csv and out.xlsx
     assert ret == 0
     # Now overwrite them
-    ret = os.system("python licensetool.py --force csv tests/3-packages.manifest " + tmp_outfile)
+    ret = os.system("python licensetool.py --force list tests/3-packages.manifest " + tmp_outfilebase)
     assert ret == 0
 
-def test_csv_input_missing():
-    ret = os.system("python licensetool.py csv non-existent-file tests/out.csv")
+def test_list_input_missing():
+    ret = os.system("python licensetool.py list non-existent-file tests/out")
     assert ret != 0
 
-def test_csv_output_existing():
-    ret = os.system("python licensetool.py csv tests/3-packages.manifest tests/3-packages.manifest.v2")
+def test_list_output_existing(tmpdir):
+    tmp_outfile = str(tmpdir.join("out"))
+    ret = os.system("python licensetool.py list tests/3-packages.manifest " + tmp_outfile)
+    # 1st time should pass.
+    assert ret == 0
+    # 2nd time must fail
+    ret = os.system("python licensetool.py list tests/3-packages.manifest " + tmp_outfile)
     assert ret != 0
 
 def test_changes_only():
     ret = os.system("python licensetool.py changes")
     assert ret != 0
 
-def test_changes_input1_missing():
-    ret = os.system("python licensetool.py changes non-existent-file non-existent-file2 tests/out.csv")
+def test_changes_input1_missing(tmpdir):
+    tmp_outfile = str(tmpdir.join("out"))
+    ret = os.system("python licensetool.py changes non-existent-file tests/3-packages.manifest.v2 "+ tmp_outfile)
     assert ret != 0
 
-def test_changes_input2_missing():
-    ret = os.system("python licensetool.py changes tests/3-packages.manifest non-existent-file2 tests/out.csv")
+def test_changes_input2_missing(tmpdir):
+    tmp_outfile = str(tmpdir.join("out"))
+    ret = os.system("python licensetool.py changes tests/3-packages.manifest non-existent-file2 " + tmp_outfile)
     assert ret != 0
 
-def test_changes_unknown_option():
-    ret = os.system("python licensetool.py --unknown changes tests/3-packages.manifest non-existent-file2 tests/out.csv")
+def test_changes_unknown_option(tmpdir):
+    tmp_outfile = str(tmpdir.join("out"))
+    ret = os.system("python licensetool.py --unknownoption changes tests/3-packages.manifest tests/3-packages.manifest.v2 " + tmp_outfile)
     assert ret != 0
 
-def test_csv_output_existing(tmpdir):
+def test_changes_output_existing(tmpdir):
     tmp_outfile = str(tmpdir.join("out"))
     ret = os.system("python licensetool.py changes tests/3-packages.manifest tests/3-packages.manifest.v2 " + tmp_outfile)
     # 1st time should pass.
