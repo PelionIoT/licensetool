@@ -11,7 +11,7 @@ LicenseTool is a Python program that has two primary functions:
 
 ## Installation
 
-You need to have Python version 3 installed in your system. This has only been tested in Linux, we do not plan to test or support Windows or Mac platforms in any way or manner as Yocto builds are done on Linux anyway.
+You need to have Python version 3.6 (or newer) installed in your system. This has only been tested in Linux, we do not plan to test or support Windows or Mac platforms in any way or manner as Yocto builds are done on Linux anyway.
 
 We highly recommend using a [Python virtual environment](https://docs.python.org/3/tutorial/venv.html).
 
