@@ -15,8 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""A tool for dealing with Yocto license manifest files, converting them to CSV-format
-or CSV-format with change information."""
+"""A tool for dealing with Yocto license manifest files, converting them to
+CSV/Excel-format, optionally with change information."""
 
 import sys
 import os
@@ -95,7 +95,7 @@ def read_manifest_file(input_file):
     return d_f, status
 
 # _csv - generate CSV-file from a license manifest file
-#           filenames of input file and output file needed as parameters
+#        filenames of input file and output file needed as parameters
 #
 def _csv(inputfile, outputfile):
 
@@ -106,7 +106,7 @@ def _csv(inputfile, outputfile):
 
     # Export CSV, if no errors noticed
     if status["errors"] is False:
-        d_f.to_csv(outputfile+".csv", index=False)
+        d_f.to_csv(outputfile+".csv", index = False)
         generate_excel(outputfile+".xlsx", d_f.style)
     else:
         print("ERROR - could not process license manifest file " + inputfile)
@@ -317,8 +317,8 @@ def main():
                 print("ERROR - output file: '" + args.listfile + "'.csv or .xlsx already exists.")
                 sys.exit(2)  # ENOENT
             else:
-                print("Warning - output file: '" + args.listfile + "'.csv or .xlsx already exists."
-                    "Will overwrite.")
+                print("Warning - output file: '" + args.listfile + "'.csv or .xlsx already exists. "
+                      "Will overwrite.")
 
         _csv(args.inputfile, args.listfile)
 
@@ -335,7 +335,7 @@ def main():
                 sys.exit(2)  # ENOENT
             else:
                 print("Warning - output file: '" + args.changefile + "' already exists. "
-                    "Will overwrite.")
+                      "Will overwrite.")
 
         _changes(args.previous, args.current, args.changefile)
 
