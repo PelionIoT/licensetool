@@ -224,6 +224,7 @@ def generate_excel(output, styled):
     writer = pd.ExcelWriter(output, engine='openpyxl') # pylint: disable=abstract-class-instantiated
     styled.to_excel(writer, sheet_name='Sheet1', index=False)
     # Get the xlsxwriter workbook and worksheet objects.
+    # pylint: disable=E1101
     workbook = writer.book
     worksheet = workbook.active
     worksheet.auto_filter.ref = worksheet.dimensions
