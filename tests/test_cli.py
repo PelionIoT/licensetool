@@ -47,9 +47,16 @@ def test_list_input_output(tmpdir):
     ret = os.system("python licensetool.py list tests/3-packages.manifest " + tmp_outfilebase)
     assert ret == 0
 
-def test_list_input_missing():
+def test_list_input_missing(tmpdir):
     """Test list with non-existent input file (fail)"""
-    ret = os.system("python licensetool.py list non-existent-file tests/out")
+    tmp_outfilebase = str(tmpdir.join("out"))
+    ret = os.system("python licensetool.py list non-existent-file " + tmp_outfilebase)
+    assert ret != 0
+
+def test_list_broken_manifest(tmpdir):
+    """Test list with broken input file (fail)"""
+    tmp_outfilebase = str(tmpdir.join("out"))
+    ret = os.system("python licensetool.py list tests/broken.manifest " + tmp_outfilebase)
     assert ret != 0
 
 def test_list_output_existing(tmpdir):
