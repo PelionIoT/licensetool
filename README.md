@@ -2,7 +2,7 @@
 
 LicenseTool is a Python program that has two primary functions:
 
-1. Format the Yocto build produced `license.manifest` formatted file to CSV-formatted file.
+1. Format the Yocto build produced `license.manifest` formatted file to list or tabularly formatted file.
     - CSV aka Comma-Separated-Values -files are commonly accepted by many applications and libraries as a data format.
     - This way you can import the package license information for example to Excel for further analysis
 1. Take two Yocto build `license.manifest` files and create a CSV-formatted file that shows the changes between the two builds.
@@ -36,7 +36,7 @@ dev-init.sh
 
 ### Generate CSV-formatted license file
 
-`python licensetool.py csv <input manifest file> <output>`
+`python licensetool.py list <input manifest file> <output>`
 
 This will generate two output files,
 
@@ -71,6 +71,6 @@ All contributions must be done with compliance to Apache 2.0 license.
 All contributions must pass:
 - Clear written statement that author agrees to Apache 2.0 license and is the original author of the changes.
 - Code review, so submit a pull request (PR).
-- Run `pylint licensetool.py` and make sure the score does not get worse (9.82 now).
+- Run `pylint licensetool.py` and make sure the score does not get worse (10/10 now).
 - Include necessary test case updates, so that coverage does not decrease - provide evidence in the PR.
 - Include required documentation updates.
