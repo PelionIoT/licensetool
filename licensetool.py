@@ -29,6 +29,12 @@ _CSV = ".csv"
 _XLS = ".xlsx"
 _EXISTS = "'.csv or .xlsx already exists."
 _NOT_EXIST = "' does not exist."
+_OVERWRITE = " Will overwrite."
+
+_PKG_ADD = "package added"
+_PKG_REM = "package removed"
+_LIC_CHG = "license change"
+_VER_CHG = "version change"
 
 def _print_help():
 
@@ -119,12 +125,42 @@ def gen_list(inputfile, outputfile):
         sys.exit(71) # EPROTO
     print(inputfile + " " + str(status) )
 
-# gen_changes - generate change information based on two Yocto license manifest files
+# init_change_summary  - initialize change summary dict
 #
-def gen_changes(previous, current, output):
-    """gen_list - generate list formatted change output (.csv and .xlsx) from 2 manifest files."""
+def init_change_summary():
+    """Initalize and return a change_summary dict."""
+    logging.info("Finding changes...")
+    change_summary = {
+        _VER_CHG : 0,
+        _LIC_CHG : 0,
+        _PKG_ADD : 0,
+        _PKG_REM : 0,
+    }
+    return change_summary
 
-    logging.debug("_changes: '%s', '%s', '%s'", previous, current, output)
+#
+# print_change_summary - print out a summary of the changes
+#                        from the dict passed as argumntn (chg_sum)
+#
+def print_change_summary(chg_sum):
+    """Print change summary from given dict."""
+    print("")
+    print("Total changes  : ", (
+        chg_sum[_PKG_ADD] +
+        chg_sum[_PKG_REM] +
+        chg_sum[_LIC_CHG] +
+        chg_sum[_VER_CHG] ))
+    print("Package changes: ", (chg_sum[_PKG_ADD] + chg_sum[_PKG_REM]))
+    print("- Added        : ", chg_sum[_PKG_ADD])
+    print("- Removed      : ", chg_sum[_PKG_REM])
+    print("License changes: ", chg_sum[_LIC_CHG])
+    print("Version changes: ", chg_sum[_VER_CHG])
+
+# read_and_merge_manifests  - read previous and current manifest files
+#                             and return a merged dataframe with their content.
+
+def read_and_merge_manifests(previous, current):
+    """Read previous and current manifest, return as two dataframes"""
     d_f_prev, status_prev = read_manifest_file(previous)
     d_f_prev.rename(
         columns={"version":"prev_ver", "license":"prev_license", "recipe":"prev_recipe"},
@@ -146,8 +182,19 @@ def gen_changes(previous, current, output):
     print(current + " " + str(status_curr) )
 
     # 1st create a merged table that has both previous and current information
+    logging.info("Merging dataframes...")
     d_f_combo = pd.merge(d_f_prev, d_f_curr, on = "package", how = "outer")
     logging.debug(d_f_combo)
+    return d_f_combo
+
+# gen_changes - generate change information based on two Yocto license manifest files
+#
+def gen_changes(previous, current, output):
+    """gen_list - generate list formatted change output (.csv and .xlsx) from 2 manifest files."""
+
+    logging.debug("gen_changes: '%s', '%s', '%s'", previous, current, output)
+    # Read the manifests, get them merged into one combined dataframe
+    d_f_combo = read_and_merge_manifests(previous, current)
 
     # With that, we can now start going it through and add the "changes" columns
     # to highlight what has changed.
@@ -158,6 +205,7 @@ def gen_changes(previous, current, output):
     i = 0
     rows = d_f_combo.shape[0]
     styled = d_f_combo.style
+    change_summary = init_change_summary()  # Get dict for collecting changes
     while i < rows:
         # Check package appearing, start by setting change is "n"
         package_change = False
@@ -177,6 +225,7 @@ def gen_changes(previous, current, output):
                 column=d_f_combo.columns.get_loc("curr_license"),
                 color="yellow", axis=None)
             package_change = True
+            change_summary[_PKG_ADD] += 1
         # Package removed
         if package_change is False and pd.isna(d_f_combo.at[i, "curr_recipe"]): # NaN
             d_f_combo.at[i, "change"] = "y"
@@ -194,6 +243,7 @@ def gen_changes(previous, current, output):
                 column=d_f_combo.columns.get_loc("prev_license"),
                 color="yellow", axis=None)
             package_change = True
+            change_summary[_PKG_REM] +=1
         # Version change
         if package_change is False and d_f_combo.at[i, "prev_ver"] != d_f_combo.at[i, "curr_ver"]:
             d_f_combo.at[i, "change"] = "y"
@@ -204,6 +254,7 @@ def gen_changes(previous, current, output):
             styled = styled.apply(style_single_cell, row=i,
                 column=d_f_combo.columns.get_loc("curr_ver"),
                 color="green", axis=None)
+            change_summary[_VER_CHG] +=1
         # License change
         if package_change is False and \
            d_f_combo.at[i, "prev_license"] != d_f_combo.at[i, "curr_license"]:
@@ -215,11 +266,15 @@ def gen_changes(previous, current, output):
             styled = styled.apply(style_single_cell, row=i,
                 column=d_f_combo.columns.get_loc("curr_license"),
                 color="red", axis=None)
+            change_summary[_LIC_CHG] +=1
         # No changes cases is the default, as we set all change columns to n at start
         i = i + 1
     # Export result out
+    logging.info("Export CSV: %s ", output + _CSV)
     d_f_combo.to_csv(path_or_buf=output + _CSV, index=False)
+    logging.info("Export Excel: %s", output + _XLS)
     generate_excel(output=output + _XLS, styled=styled)
+    print_change_summary(change_summary)
 
 #
 # generate_excel   output = output filename,
@@ -326,8 +381,7 @@ def parse_list(args):
             print("ERROR - output file: '" + args.listfile + _EXISTS)
             sys.exit(2)  # ENOENT
         else:
-            print("Warning - output file: '" + args.listfile + _EXISTS +
-                  "Will overwrite.")
+            print("Warning - output file: '" + args.listfile + _EXISTS + _OVERWRITE)
     gen_list(args.inputfile, args.listfile)
 
 # parse_changes - handle the case of changes option sanitizing/checking
@@ -347,8 +401,7 @@ def parse_changes(args):
             print("ERROR - output file: '" + args.changefile + _EXISTS)
             sys.exit(2)  # ENOENT
         else:
-            print("Warning - output file: '" + args.changefile + _EXISTS +
-                  "Will overwrite.")
+            print("Warning - output file: '" + args.changefile + _EXISTS + _OVERWRITE)
     gen_changes(args.previous, args.current, args.changefile)
 
 def main():
