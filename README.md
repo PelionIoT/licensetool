@@ -62,7 +62,7 @@ Tests and test material are located in [tests](tests)-folder.
 You can run them from the root folder:
 
 ```
-pytest --cov=licensetool --cov-report term-missing tests/
+pytest -v -o junit_family=xunit1 --cov=. --cov-report xml:coverage.xml --cov-report html:test-results/cov_html --junitxml=xunit-reports/xunit.xml
 ```
 
 ## Contributions
