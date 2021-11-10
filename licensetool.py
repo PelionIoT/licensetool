@@ -15,8 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""A tool for dealing with Yocto license manifest files, converting them to CSV-format
-or CSV-format with change information."""
+"""A tool for dealing with Yocto license manifest files, converting them to
+CSV/Excel-format, optionally with change information."""
 
 import sys
 import os
@@ -29,9 +29,9 @@ def _print_help():
 
     print("Yocto license manifest tool")
     print("")
-    print("license-tool.py csv <input license manifest file> <output file>")
+    print("license-tool.py list <input license manifest file> <output file>")
     print("   Generate a CSV-formatted version of the Yocto manifest file")
-    print("   For example license-tool.py csv license.manifest licenses ")
+    print("   For example license-tool.py list license.manifest licenses ")
     print("   Will generate licenses.csv and licenses.xlsx files.")
     print("")
     print("license-tool.py changes <previous manifest file> <current manifest file> "
@@ -95,7 +95,7 @@ def read_manifest_file(input_file):
     return d_f, status
 
 # _csv - generate CSV-file from a license manifest file
-#           filenames of input file and output file needed as parameters
+#        filenames of input file and output file needed as parameters
 #
 def _csv(inputfile, outputfile):
 
@@ -106,7 +106,7 @@ def _csv(inputfile, outputfile):
 
     # Export CSV, if no errors noticed
     if status["errors"] is False:
-        d_f.to_csv(outputfile+".csv", index=False)
+        d_f.to_csv(outputfile+".csv", index = False)
         generate_excel(outputfile+".xlsx", d_f.style)
     else:
         print("ERROR - could not process license manifest file " + inputfile)
@@ -247,18 +247,19 @@ def _parse_args():
 
     parser = argparse.ArgumentParser()
 
-    # Two command modes, csv and change
+    # Two command modes, list and change
 
     subparsers = parser.add_subparsers(dest="command")
-    parser_csv = subparsers.add_parser("csv",
-        help="create CSV file of Yocto License manifest file.")
-    parser_csv.add_argument(
+    parser_list = subparsers.add_parser("list",
+        help="Create CSV and Excel-file of Yocto License manifest file.")
+    parser_list.add_argument(
         "inputfile",
         help="Yocto license manifest file name (used as input)",
     )
-    parser_csv.add_argument(
-        "csvfile",
-        help="Name for CSV-formatted output file name",
+    parser_list.add_argument(
+        "listfile",
+        help="Name base for CSV/Excel-formatted output list file name, i.e."
+        " <listfile>.csv/.xlsx",
     )
     parser_changes = subparsers.add_parser("changes",
         help="Create changes highlighting list from two Yocto license manifest files.")
@@ -272,7 +273,8 @@ def _parse_args():
     )
     parser_changes.add_argument(
         "changefile",
-        help="Name for CSV-formatted changes file name",
+        help="Name base for CSV/Excel-formatted changes file name, i.e."
+        " <changefile>.csv/.xlsx",
     )
     parser.add_argument("--force",
         help="Force overwrite of existing output file",
@@ -306,19 +308,19 @@ def main():
 
     """Script entry point."""
     args = _parse_args()
-    if args.command == "csv":
+    if args.command == "list":
         if not os.path.isfile(args.inputfile):
             print("ERROR - input file: '" + args.inputfile + "' does not exist.")
             sys.exit(2) # ENOENT
-        if os.path.isfile(args.csvfile+".csv") or os.path.isfile(args.csvfile+".xlsx"):
+        if os.path.isfile(args.listfile+".csv") or os.path.isfile(args.listfile+".xlsx"):
             if not args.force:
-                print("ERROR - output file: '" + args.csvfile + "'.csv or .xlsx already exists.")
+                print("ERROR - output file: '" + args.listfile + "'.csv or .xlsx already exists.")
                 sys.exit(2)  # ENOENT
             else:
-                print("Warning - output file: '" + args.csvfile + "'.csv or .xlsx already exists. "
-                    "Will overwrite.")
+                print("Warning - output file: '" + args.listfile + "'.csv or .xlsx already exists. "
+                      "Will overwrite.")
 
-        _csv(args.inputfile, args.csvfile)
+        _csv(args.inputfile, args.listfile)
 
     if args.command == "changes":
         if not os.path.isfile(args.previous):
@@ -333,7 +335,7 @@ def main():
                 sys.exit(2)  # ENOENT
             else:
                 print("Warning - output file: '" + args.changefile + "' already exists. "
-                    "Will overwrite.")
+                      "Will overwrite.")
 
         _changes(args.previous, args.current, args.changefile)
 
