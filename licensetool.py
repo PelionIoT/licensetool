@@ -25,6 +25,9 @@ import argparse
 import re
 import pandas as pd
 
+_csv = ".csv"
+_xls = ".xlsx"
+
 def _print_help():
 
     print("Yocto license manifest tool")
@@ -94,20 +97,21 @@ def read_manifest_file(input_file):
         status = {"lines": num_lines, "packages": package_count, "errors": errors}
     return d_f, status
 
-# _csv - generate CSV-file from a license manifest file
-#        filenames of input file and output file needed as parameters
+# gen_list - generate list-formatted files from a license manifest file
+#            filenames of input file and output filename base needed as
+#            parameters. Two output files are created, file.csv and .xlsx.
 #
-def _csv(inputfile, outputfile):
+def gen_list(inputfile, outputfile):
 
-    logging.debug("_csv: '%s','%s'", inputfile, outputfile)
+    logging.debug("gen_list: '%s','%s'", inputfile, outputfile)
 
     # Covert the manifest to a Pandas dataframe
     d_f, status = read_manifest_file(inputfile)
 
     # Export CSV, if no errors noticed
     if status["errors"] is False:
-        d_f.to_csv(outputfile+".csv", index = False)
-        generate_excel(outputfile+".xlsx", d_f.style)
+        d_f.to_csv(outputfile + _csv, index = False)
+        generate_excel(outputfile + _xls, d_f.style)
     else:
         print("ERROR - could not process license manifest file " + inputfile)
         sys.exit(71) # EPROTO
@@ -210,8 +214,8 @@ def _changes(previous, current, output):
         # No changes cases is the default, as we set all change columns to n at start
         i = i + 1
     # Export result out
-    d_f_combo.to_csv(path_or_buf=output+".csv", index=False)
-    generate_excel(output=output+".xlsx", styled=styled)
+    d_f_combo.to_csv(path_or_buf=output + _csv, index=False)
+    generate_excel(output=output + _xls, styled=styled)
 
 #
 # generate_excel   output = output filename,
@@ -306,21 +310,23 @@ def _parse_args():
 
 def main():
 
+    _exists = "'.csv or .xlsx already exists."
+
     """Script entry point."""
     args = _parse_args()
     if args.command == "list":
         if not os.path.isfile(args.inputfile):
             print("ERROR - input file: '" + args.inputfile + "' does not exist.")
             sys.exit(2) # ENOENT
-        if os.path.isfile(args.listfile+".csv") or os.path.isfile(args.listfile+".xlsx"):
+        if os.path.isfile(args.listfile + _csv) or os.path.isfile(args.listfile + _xls):
             if not args.force:
-                print("ERROR - output file: '" + args.listfile + "'.csv or .xlsx already exists.")
+                print("ERROR - output file: '" + args.listfile + _exists)
                 sys.exit(2)  # ENOENT
             else:
-                print("Warning - output file: '" + args.listfile + "'.csv or .xlsx already exists. "
+                print("Warning - output file: '" + args.listfile + _exists +
                       "Will overwrite.")
 
-        _csv(args.inputfile, args.listfile)
+        gen_list(args.inputfile, args.listfile)
 
     if args.command == "changes":
         if not os.path.isfile(args.previous):
@@ -329,12 +335,12 @@ def main():
         if not os.path.isfile(args.current):
             print("ERROR - current license file: '" + args.current + "' does not exist.")
             sys.exit(2) # ENOENT
-        if os.path.isfile(args.changefile+".csv") or os.path.isfile(args.changefile+".xlsx"):
+        if os.path.isfile(args.changefile + _csv) or os.path.isfile(args.changefile + _xls):
             if not args.force:
-                print("ERROR - output file: '" + args.changefile + "'.csv or .xlsx already exists.")
+                print("ERROR - output file: '" + args.changefile + _exists)
                 sys.exit(2)  # ENOENT
             else:
-                print("Warning - output file: '" + args.changefile + "' already exists. "
+                print("Warning - output file: '" + args.changefile + _exists +
                       "Will overwrite.")
 
         _changes(args.previous, args.current, args.changefile)
