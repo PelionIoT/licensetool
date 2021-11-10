@@ -44,11 +44,11 @@ def test_outfile_exists(tmpdir):
     tmp_outfiles = str(tmpdir.join("out"))
     # 1st run - create the file out.xls
     ret = os.system("python licensetool.py changes tests/3-packages.manifest "
-                    "tests/3-packages.manifest " + tmp_outfiles)
+                    "tests/3-packages.manifest.v2 " + tmp_outfiles)
     assert ret == 0
     # 2nd run must fail, files now already exist (out.csv/out.xlsx)
     ret = os.system("python licensetool.py changes tests/3-packages.manifest "
-                    "tests/3-packages.manifest " + tmp_outfiles)
+                    "tests/3-packages.manifest.v2 " + tmp_outfiles)
     assert ret != 0
 
 # Invalid previous
