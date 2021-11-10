@@ -25,8 +25,10 @@ import argparse
 import re
 import pandas as pd
 
-_csv = ".csv"
-_xls = ".xlsx"
+_CSV = ".csv"
+_XLS = ".xlsx"
+_EXISTS = "'.csv or .xlsx already exists."
+_NOT_EXIST = "' does not exist."
 
 def _print_help():
 
@@ -102,7 +104,7 @@ def read_manifest_file(input_file):
 #            parameters. Two output files are created, file.csv and .xlsx.
 #
 def gen_list(inputfile, outputfile):
-
+    """gen_list - generate list formatted output (.csv and .xlsx) from manifest file."""
     logging.debug("gen_list: '%s','%s'", inputfile, outputfile)
 
     # Covert the manifest to a Pandas dataframe
@@ -110,17 +112,17 @@ def gen_list(inputfile, outputfile):
 
     # Export CSV, if no errors noticed
     if status["errors"] is False:
-        d_f.to_csv(outputfile + _csv, index = False)
-        generate_excel(outputfile + _xls, d_f.style)
+        d_f.to_csv(outputfile + _CSV, index = False)
+        generate_excel(outputfile + _XLS, d_f.style)
     else:
         print("ERROR - could not process license manifest file " + inputfile)
         sys.exit(71) # EPROTO
     print(inputfile + " " + str(status) )
 
-
-# _changes - generate change information based on two Yocto license manifest files
+# gen_changes - generate change information based on two Yocto license manifest files
 #
-def _changes(previous, current, output):
+def gen_changes(previous, current, output):
+    """gen_list - generate list formatted change output (.csv and .xlsx) from 2 manifest files."""
 
     logging.debug("_changes: '%s', '%s', '%s'", previous, current, output)
     d_f_prev, status_prev = read_manifest_file(previous)
@@ -131,6 +133,7 @@ def _changes(previous, current, output):
     if status_prev["errors"] is True:
         print("ERROR - handling of '" + previous + "' failed.")
         sys.exit(71) # EPROTO
+    print(previous + " " + str(status_prev) )
 
     d_f_curr, status_curr = read_manifest_file(current)
     d_f_curr.rename(
@@ -140,6 +143,7 @@ def _changes(previous, current, output):
     if status_curr["errors"] is True:
         print("ERROR - handling of '" + current + "' failed.")
         sys.exit(71) # EPROTO
+    print(current + " " + str(status_curr) )
 
     # 1st create a merged table that has both previous and current information
     d_f_combo = pd.merge(d_f_prev, d_f_curr, on = "package", how = "outer")
@@ -214,8 +218,8 @@ def _changes(previous, current, output):
         # No changes cases is the default, as we set all change columns to n at start
         i = i + 1
     # Export result out
-    d_f_combo.to_csv(path_or_buf=output + _csv, index=False)
-    generate_excel(output=output + _xls, styled=styled)
+    d_f_combo.to_csv(path_or_buf=output + _CSV, index=False)
+    generate_excel(output=output + _XLS, styled=styled)
 
 #
 # generate_excel   output = output filename,
@@ -308,42 +312,54 @@ def _parse_args():
         sys.exit(8) # ENOEXEC
     return args
 
-def main():
+# parse_list - handle the case of list option sanitizing/checking
+#
+def parse_list(args):
 
-    _exists = "'.csv or .xlsx already exists."
+    """Parse arguments in case of list -option/command given."""
+
+    if not os.path.isfile(args.inputfile):
+        print("ERROR - input file: '" + args.inputfile + "' does not exist.")
+        sys.exit(2) # ENOENT
+    if os.path.isfile(args.listfile + _CSV) or os.path.isfile(args.listfile + _XLS):
+        if not args.force:
+            print("ERROR - output file: '" + args.listfile + _EXISTS)
+            sys.exit(2)  # ENOENT
+        else:
+            print("Warning - output file: '" + args.listfile + _EXISTS +
+                  "Will overwrite.")
+    gen_list(args.inputfile, args.listfile)
+
+# parse_changes - handle the case of changes option sanitizing/checking
+#
+def parse_changes(args):
+
+    """Parse arguments in case of change -option/command given."""
+
+    if not os.path.isfile(args.previous):
+        print("ERROR - previous license file: '" + args.previous + _NOT_EXIST)
+        sys.exit(2) # ENOENT
+    if not os.path.isfile(args.current):
+        print("ERROR - current license file: '" + args.current + _NOT_EXIST)
+        sys.exit(2) # ENOENT
+    if os.path.isfile(args.changefile + _CSV) or os.path.isfile(args.changefile + _XLS):
+        if not args.force:
+            print("ERROR - output file: '" + args.changefile + _EXISTS)
+            sys.exit(2)  # ENOENT
+        else:
+            print("Warning - output file: '" + args.changefile + _EXISTS +
+                  "Will overwrite.")
+    gen_changes(args.previous, args.current, args.changefile)
+
+def main():
 
     """Script entry point."""
     args = _parse_args()
     if args.command == "list":
-        if not os.path.isfile(args.inputfile):
-            print("ERROR - input file: '" + args.inputfile + "' does not exist.")
-            sys.exit(2) # ENOENT
-        if os.path.isfile(args.listfile + _csv) or os.path.isfile(args.listfile + _xls):
-            if not args.force:
-                print("ERROR - output file: '" + args.listfile + _exists)
-                sys.exit(2)  # ENOENT
-            else:
-                print("Warning - output file: '" + args.listfile + _exists +
-                      "Will overwrite.")
-
-        gen_list(args.inputfile, args.listfile)
+        parse_list(args)
 
     if args.command == "changes":
-        if not os.path.isfile(args.previous):
-            print("ERROR - previous license file: '" + args.previous + "' does not exist.")
-            sys.exit(2) # ENOENT
-        if not os.path.isfile(args.current):
-            print("ERROR - current license file: '" + args.current + "' does not exist.")
-            sys.exit(2) # ENOENT
-        if os.path.isfile(args.changefile + _csv) or os.path.isfile(args.changefile + _xls):
-            if not args.force:
-                print("ERROR - output file: '" + args.changefile + _exists)
-                sys.exit(2)  # ENOENT
-            else:
-                print("Warning - output file: '" + args.changefile + _exists +
-                      "Will overwrite.")
-
-        _changes(args.previous, args.current, args.changefile)
+        parse_changes(args)
 
 if __name__ == "__main__":
 
