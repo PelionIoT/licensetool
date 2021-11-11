@@ -24,8 +24,6 @@ import logging
 import argparse
 import re
 import pandas as pd
-import openpyxl
-from openpyxl.worksheet.dimensions import ColumnDimension, DimensionHolder
 from openpyxl.utils import get_column_letter
 
 _CSV = ".csv"
