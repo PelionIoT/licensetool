@@ -22,6 +22,8 @@
 import os
 import pandas as pd
 
+_PY_LCTOOL_CHANGES_PACK = "python licensetool.py changes tests/3-packages.manifest "
+
 # Test previous empty file
 def test_empty_license_prev(tmpdir):
     """Test with empty 1st file (fail)"""
@@ -34,21 +36,18 @@ def test_empty_license_prev(tmpdir):
 def test_empty_license_curr(tmpdir):
     """Test with empty 2nd input file (fail)"""
     tmp_outfiles = str(tmpdir.join("out"))
-    ret = os.system("python licensetool.py changes tests/3-packages.manifest "
-                    "tests/empty_file.manifest " + tmp_outfiles)
+    ret = os.system(_PY_LCTOOL_CHANGES_PACK + "tests/empty_file.manifest " + tmp_outfiles)
     assert ret != 0
 
 # If output file exists, it should refuse to overwrite
 def test_outfile_exists(tmpdir):
     """Test overwrite protection (fail, will not overwrite without --force option)"""
     tmp_outfiles = str(tmpdir.join("out"))
-    # 1st run - create the file out.xls
-    ret = os.system("python licensetool.py changes tests/3-packages.manifest "
-                    "tests/3-packages.manifest " + tmp_outfiles)
+    # 1st run - create the file out.csv/.xlsx
+    ret = os.system(_PY_LCTOOL_CHANGES_PACK + "tests/3-packages.manifest.v2 " + tmp_outfiles)
     assert ret == 0
     # 2nd run must fail, files now already exist (out.csv/out.xlsx)
-    ret = os.system("python licensetool.py changes tests/3-packages.manifest "
-                    "tests/3-packages.manifest " + tmp_outfiles)
+    ret = os.system(_PY_LCTOOL_CHANGES_PACK + "tests/3-packages.manifest.v2 " + tmp_outfiles)
     assert ret != 0
 
 # Invalid previous
@@ -63,8 +62,7 @@ def test_invalid_previous(tmpdir):
 def test_invalid_current(tmpdir):
     """Test with broken 2nd input file (fail)"""
     tmp_outfiles = str(tmpdir.join("out"))
-    ret = os.system("python licensetool.py changes tests/3-packages.manifest "
-                    "tests/broken.manifest " + tmp_outfiles)
+    ret = os.system(_PY_LCTOOL_CHANGES_PACK + "tests/broken.manifest " + tmp_outfiles)
     assert ret != 0
 
 # Success case

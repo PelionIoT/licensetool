@@ -27,3 +27,10 @@ __pycache__/
 .pytest_cache
 .coverage
 licensetool.egg-info/
+coverage-reports/
+xunit-reports/
+test-results/
+coverage.xml
+
+# SonarQube
+.scannerwork
