@@ -26,16 +26,27 @@ import re
 import pandas as pd
 from openpyxl.utils import get_column_letter
 
+# Lots of literals
 _CSV = ".csv"
 _XLS = ".xlsx"
 _EXISTS = "'.csv or .xlsx already exists."
 _NOT_EXIST = "' does not exist."
 _OVERWRITE = " Will overwrite."
 
-_PKG_ADD = "package added"
-_PKG_REM = "package removed"
-_LIC_CHG = "license change"
-_VER_CHG = "version change"
+_PREV_LIC = "Previous license"
+_PREV_VER = "Previous version"
+_PREV_REC = "Previous recipe"
+_CURR_LIC = "Current license"
+_CURR_VER = "Current version"
+_CURR_REC = "Current recipe"
+
+_MARK_CHG = "y"                 # What we use to mark changes
+_PKG = "Package"
+_CHG = "Change"
+_PKG_ADD = "Package added"
+_PKG_REM = "Package removed"
+_LIC_CHG = "License change"
+_VER_CHG = "Version change"
 
 def _print_help():
 
@@ -71,7 +82,7 @@ def read_manifest_file(input_file):
     with open(input_file, "r", encoding='utf8') as f_h:
         data = f_h.read()
         # Create empty dataframe
-        column_names = ["package", "version", "recipe", "license"]
+        column_names = [_PKG, "version", "recipe", "license"]
         d_f = pd.DataFrame(columns=column_names)
 
         package_count = 0
@@ -164,7 +175,7 @@ def read_and_merge_manifests(previous, current):
     """Read previous and current manifest, return as two dataframes"""
     d_f_prev, status_prev = read_manifest_file(previous)
     d_f_prev.rename(
-        columns={"version":"prev_ver", "license":"prev_license", "recipe":"prev_recipe"},
+        columns={"version": _PREV_VER, "license": _PREV_LIC, "recipe": _PREV_REC},
         inplace=True
     )
     if status_prev["errors"] is True:
@@ -174,7 +185,7 @@ def read_and_merge_manifests(previous, current):
 
     d_f_curr, status_curr = read_manifest_file(current)
     d_f_curr.rename(
-        columns={"version":"curr_ver", "license":"curr_license", "recipe":"curr_recipe"},
+        columns={"version": _CURR_VER, "license": _CURR_LIC, "recipe": _CURR_REC},
         inplace=True
     )
     if status_curr["errors"] is True:
@@ -184,7 +195,7 @@ def read_and_merge_manifests(previous, current):
 
     # 1st create a merged table that has both previous and current information
     logging.info("Merging dataframes...")
-    d_f_combo = pd.merge(d_f_prev, d_f_curr, on = "package", how = "outer")
+    d_f_combo = pd.merge(d_f_prev, d_f_curr, on = _PKG, how = "outer")
     logging.debug(d_f_combo)
     return d_f_combo
 
@@ -202,7 +213,7 @@ def gen_changes(previous, current, output):
     # Not going to consider recipe change a change worth high-lighting, that is not relevant from
     # Third Party IP point of view.
 
-    d_f_combo[["change", "version_change","license_change","package_add", "package_removed"]] = ""
+    d_f_combo[[_CHG, _VER_CHG,_LIC_CHG, _PKG_ADD, _PKG_REM]] = ""
     i = 0
     rows = d_f_combo.shape[0]
     styled = d_f_combo.style
@@ -210,62 +221,62 @@ def gen_changes(previous, current, output):
     while i < rows:
         # Check package appearing, start by setting change is "n"
         package_change = False
-        if pd.isna(d_f_combo.at[i, "prev_recipe"]): # NaN
-            d_f_combo.at[i, "change"] = "y"
-            d_f_combo.at[i, "package_add"] = "y"
+        if pd.isna(d_f_combo.at[i, _PREV_REC]): # NaN
+            d_f_combo.at[i, _CHG] = _MARK_CHG
+            d_f_combo.at[i, _PKG_ADD] = _MARK_CHG
             styled = styled.apply(style_single_cell, row=i,
-                column=d_f_combo.columns.get_loc("curr_recipe"),
+                column=d_f_combo.columns.get_loc(_CURR_REC),
                 color="yellow", axis=None)
             styled = styled.apply(style_single_cell, row=i,
-                column=d_f_combo.columns.get_loc("package"),
+                column=d_f_combo.columns.get_loc(_PKG),
                 color="yellow", axis=None)
             styled = styled.apply(style_single_cell, row=i,
-                column=d_f_combo.columns.get_loc("curr_ver"),
+                column=d_f_combo.columns.get_loc(_CURR_VER),
                 color="yellow", axis=None)
             styled = styled.apply(style_single_cell, row=i,
-                column=d_f_combo.columns.get_loc("curr_license"),
+                column=d_f_combo.columns.get_loc(_CURR_LIC),
                 color="yellow", axis=None)
             package_change = True
             change_summary[_PKG_ADD] += 1
         # Package removed
-        if package_change is False and pd.isna(d_f_combo.at[i, "curr_recipe"]): # NaN
-            d_f_combo.at[i, "change"] = "y"
-            d_f_combo.at[i, "package_removed"] = "y"
+        if package_change is False and pd.isna(d_f_combo.at[i, _CURR_REC]): # NaN
+            d_f_combo.at[i, _CHG] = _MARK_CHG
+            d_f_combo.at[i, _PKG_REM] = _MARK_CHG
             styled = styled.apply(style_single_cell, row=i,
-                column=d_f_combo.columns.get_loc("prev_recipe"),
+                column=d_f_combo.columns.get_loc(_PREV_REC),
                 color="yellow", axis=None)
             styled = styled.apply(style_single_cell, row=i,
-                column=d_f_combo.columns.get_loc("prev_ver"),
+                column=d_f_combo.columns.get_loc(_PREV_VER),
                 color="yellow", axis=None)
             styled = styled.apply(style_single_cell, row=i,
-                column=d_f_combo.columns.get_loc("package"),
+                column=d_f_combo.columns.get_loc(_PKG),
                 color="yellow", axis=None)
             styled = styled.apply(style_single_cell, row=i,
-                column=d_f_combo.columns.get_loc("prev_license"),
+                column=d_f_combo.columns.get_loc(_PREV_LIC),
                 color="yellow", axis=None)
             package_change = True
             change_summary[_PKG_REM] +=1
         # Version change
-        if package_change is False and d_f_combo.at[i, "prev_ver"] != d_f_combo.at[i, "curr_ver"]:
-            d_f_combo.at[i, "change"] = "y"
-            d_f_combo.at[i, "version_change"] = "y"
+        if package_change is False and d_f_combo.at[i, _PREV_VER] != d_f_combo.at[i, _CURR_VER]:
+            d_f_combo.at[i, _CHG] = _MARK_CHG
+            d_f_combo.at[i, _VER_CHG] = _MARK_CHG
             styled = styled.apply(style_single_cell, row=i,
-                column=d_f_combo.columns.get_loc("prev_ver"),
+                column=d_f_combo.columns.get_loc(_PREV_VER),
                 color="green", axis=None)
             styled = styled.apply(style_single_cell, row=i,
-                column=d_f_combo.columns.get_loc("curr_ver"),
+                column=d_f_combo.columns.get_loc(_CURR_VER),
                 color="green", axis=None)
             change_summary[_VER_CHG] +=1
         # License change
         if package_change is False and \
-           d_f_combo.at[i, "prev_license"] != d_f_combo.at[i, "curr_license"]:
-            d_f_combo.at[i, "change"] = "y"
-            d_f_combo.at[i, "license_change"] = "y"
+           d_f_combo.at[i, _PREV_LIC] != d_f_combo.at[i, _CURR_LIC]:
+            d_f_combo.at[i, _CHG] = _MARK_CHG
+            d_f_combo.at[i, _LIC_CHG] = _MARK_CHG
             styled = styled.apply(style_single_cell, row=i,
-                column=d_f_combo.columns.get_loc("prev_license"),
+                column=d_f_combo.columns.get_loc(_PREV_LIC),
                 color="red", axis=None)
             styled = styled.apply(style_single_cell, row=i,
-                column=d_f_combo.columns.get_loc("curr_license"),
+                column=d_f_combo.columns.get_loc(_CURR_LIC),
                 color="red", axis=None)
             change_summary[_LIC_CHG] +=1
         # No changes cases is the default, as we set all change columns to n at start
