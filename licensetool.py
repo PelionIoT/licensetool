@@ -24,6 +24,9 @@ import logging
 import argparse
 import re
 import pandas as pd
+import openpyxl
+from openpyxl.worksheet.dimensions import ColumnDimension, DimensionHolder
+from openpyxl.utils import get_column_letter
 
 _CSV = ".csv"
 _XLS = ".xlsx"
@@ -291,6 +294,15 @@ def generate_excel(output, styled):
     workbook = writer.book
     worksheet = workbook.active
     worksheet.auto_filter.ref = worksheet.dimensions
+
+    colum_names = []
+    for cell in worksheet[1]:
+        colum_names.append(str(cell.value))
+
+    #set default width of colums to match the title
+    for col in range(worksheet.min_column, worksheet.max_column+1):
+        worksheet.column_dimensions[get_column_letter(col)].width = len(colum_names[col-1])+5
+
     writer.save()
 
 #
