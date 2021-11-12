@@ -309,6 +309,15 @@ def generate_excel(output, styled):
     # pylint: disable=E1101
     workbook = writer.book
     worksheet = workbook[_DATA_SHEET_NAME]
+
+    #put the datasheet first, _sheets is protected
+    # pylint: disable=W0212
+    oldindex = workbook._sheets.index(worksheet)
+    # pylint: disable=W0212
+    workbook._sheets.pop(oldindex)
+    # pylint: disable=W0212
+    workbook._sheets.insert(0, worksheet)
+
     worksheet.auto_filter.ref = worksheet.dimensions
 
     colum_names = []
