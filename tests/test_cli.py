@@ -58,6 +58,12 @@ def test_list_input_missing(tmpdir):
     ret = os.system("python licensetool.py list non-existent-file " + tmp_outfilebase)
     assert ret != 0
 
+def test_list_extra_param_at_end(tmpdir):
+    """Test list with extra parameter at end (fail)"""
+    tmp_outfilebase = str(tmpdir.join("out"))
+    ret = os.system(_PY_LCTOOL_LIST_3MANIFESTS + tmp_outfilebase + " extra")
+    assert ret != 0
+
 def test_list_broken_manifest(tmpdir):
     """Test list with broken input file (fail)"""
     tmp_outfilebase = str(tmpdir.join("out"))
@@ -121,6 +127,13 @@ def test_changes_unknown_option(tmpdir):
     ret = os.system("python licensetool.py --unknownoption changes tests/3-packages.manifest "
                     "tests/3-packages.manifest.v2 " + tmp_outfile)
     assert ret != 0
+
+def test_changes_extra_param_at_end(tmpdir):
+    """Test w changes extra parameter in the end (fail)"""
+    tmp_outfile = str(tmpdir.join("out"))
+    ret = os.system(_PY_LCTOOL_CHG_3MANIFESTS + tmp_outfile + " extra")
+    assert ret != 0
+
 
 def test_changes_input_ok_output(tmpdir):
     """Normal success case"""
