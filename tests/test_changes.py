@@ -21,6 +21,7 @@
 
 import os
 import pandas as pd
+from licensetool import _DATA_SHEET_NAME
 
 _PY_LCTOOL_CHANGES_PACK = "python licensetool.py changes tests/3-packages.manifest "
 
@@ -77,5 +78,6 @@ def test_changes_v1_v2(tmpdir):
     result_df = pd.read_csv(tmp_outfiles + ".csv")
     assert result_df.equals(ref_df)
     # Also the Excel-version
-    xl_result_df = pd.read_excel(tmp_outfiles + ".xlsx",  engine='openpyxl')
+    xl_result_df = pd.read_excel(tmp_outfiles + ".xlsx", sheet_name=_DATA_SHEET_NAME,
+                                 engine='openpyxl')
     assert xl_result_df.equals(ref_df)

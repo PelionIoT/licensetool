@@ -25,6 +25,7 @@ import argparse
 import re
 import pandas as pd
 from openpyxl.utils import get_column_letter
+from openpyxl import load_workbook
 
 # Lots of literals
 _CSV = ".csv"
@@ -47,6 +48,8 @@ _PKG_ADD = "Package added"
 _PKG_REM = "Package removed"
 _LIC_CHG = "License change"
 _VER_CHG = "Version change"
+
+_DATA_SHEET_NAME = "sheet1"
 
 def _print_help():
 
@@ -295,13 +298,26 @@ def gen_changes(previous, current, output):
 def generate_excel(output, styled):
     """Generate Excel-file (output) from styled Panda's dataframe."""
 
+    template_book = load_workbook("excel-template.xlsx")
+
     # Add autofilters to Excel sheet
     writer = pd.ExcelWriter(output, engine='openpyxl') # pylint: disable=abstract-class-instantiated
-    styled.to_excel(writer, sheet_name='Sheet1', index=False)
+    writer.book = template_book
+    styled.to_excel(writer, sheet_name=_DATA_SHEET_NAME, index=False)
+
     # Get the xlsxwriter workbook and worksheet objects.
     # pylint: disable=E1101
     workbook = writer.book
-    worksheet = workbook.active
+    worksheet = workbook[_DATA_SHEET_NAME]
+
+    #put the datasheet first, _sheets is protected
+    # pylint: disable=W0212
+    oldindex = workbook._sheets.index(worksheet)
+    # pylint: disable=W0212
+    workbook._sheets.pop(oldindex)
+    # pylint: disable=W0212
+    workbook._sheets.insert(0, worksheet)
+
     worksheet.auto_filter.ref = worksheet.dimensions
 
     colum_names = []
