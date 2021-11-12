@@ -22,6 +22,7 @@
 import os
 import pandas as pd
 import licensetool as t
+from licensetool import _DATA_SHEET_NAME
 
 # Test empty file
 def test_empty_license():
@@ -91,7 +92,7 @@ def test_3_packages_cli(tmpdir):
     result_d_f = pd.read_csv(tmp_outfile+".csv")
     assert result_d_f.equals(ref_d_f)
     # Also the Excel-version
-    xl_result_d_f = pd.read_excel(tmp_outfile+".xlsx",  engine='openpyxl')
+    xl_result_d_f = pd.read_excel(tmp_outfile+".xlsx", sheet_name=_DATA_SHEET_NAME, engine='openpyxl')
     assert xl_result_d_f.equals(ref_d_f)
 
 # No empty lines at the end eg. broken package
