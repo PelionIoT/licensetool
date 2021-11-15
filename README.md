@@ -18,6 +18,7 @@ We highly recommend using a [Python virtual environment](https://docs.python.org
 ## User installation
 
 ```
+git clone git@github.com:PelionIoT/licensetool.git
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
