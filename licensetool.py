@@ -134,7 +134,9 @@ def gen_list(inputfile, outputfile):
     # Export CSV, if no errors noticed
     if status["errors"] is False:
         d_f.to_csv(outputfile + _CSV, index = False)
-        generate_excel(outputfile + _XLS, d_f.style)
+        generate_excel(outputfile + _XLS,
+            d_f.style,
+            template_file="excel-template-list.xlsx")
     else:
         print("ERROR - could not process license manifest file " + inputfile)
         sys.exit(71) # EPROTO
@@ -288,7 +290,9 @@ def gen_changes(previous, current, output):
     logging.info("Export CSV: %s ", output + _CSV)
     d_f_combo.to_csv(path_or_buf=output + _CSV, index=False)
     logging.info("Export Excel: %s", output + _XLS)
-    generate_excel(output=output + _XLS, styled=styled, template_file="excel-template.xlsx")
+    generate_excel(output=output + _XLS,
+        styled=styled,
+        template_file="excel-template-changes.xlsx")
     print_change_summary(change_summary)
 
 #
