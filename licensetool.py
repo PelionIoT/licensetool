@@ -134,7 +134,9 @@ def gen_list(inputfile, outputfile):
     # Export CSV, if no errors noticed
     if status["errors"] is False:
         d_f.to_csv(outputfile + _CSV, index = False)
-        generate_excel(outputfile + _XLS, d_f.style)
+        generate_excel(outputfile + _XLS,
+            d_f.style,
+            template_file="excel-template-list.xlsx")
     else:
         print("ERROR - could not process license manifest file " + inputfile)
         sys.exit(71) # EPROTO
@@ -288,21 +290,26 @@ def gen_changes(previous, current, output):
     logging.info("Export CSV: %s ", output + _CSV)
     d_f_combo.to_csv(path_or_buf=output + _CSV, index=False)
     logging.info("Export Excel: %s", output + _XLS)
-    generate_excel(output=output + _XLS, styled=styled)
+    generate_excel(output=output + _XLS,
+        styled=styled,
+        template_file="excel-template-changes.xlsx")
     print_change_summary(change_summary)
 
 #
 # generate_excel   output = output filename,
 #                  styled = styled Pandas dataframe
 #
-def generate_excel(output, styled):
+def generate_excel(output, styled, template_file=None):
     """Generate Excel-file (output) from styled Panda's dataframe."""
 
-    template_book = load_workbook("excel-template.xlsx")
 
     # Add autofilters to Excel sheet
     writer = pd.ExcelWriter(output, engine='openpyxl') # pylint: disable=abstract-class-instantiated
-    writer.book = template_book
+
+    if template_file:
+        template_book = load_workbook(template_file)
+        writer.book = template_book
+
     styled.to_excel(writer, sheet_name=_DATA_SHEET_NAME, index=False)
 
     # Get the xlsxwriter workbook and worksheet objects.
