@@ -19,6 +19,7 @@ We highly recommend using a [Python virtual environment](https://docs.python.org
 
 ```
 git clone git@github.com:PelionIoT/licensetool.git
+cd licensetool
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
@@ -29,7 +30,7 @@ pip install -r requirements.txt
 Run the init script, it will do everything for you.
 
 ```
-dev-init.sh
+./dev-init.sh
 ```
 
 
