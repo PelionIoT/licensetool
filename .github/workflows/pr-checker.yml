@@ -1,0 +1,28 @@
+name: PR-check
+run-name: ${{ github.actor }} PR checker
+on: [push]
+jobs:
+  run-pytest-pylint:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+      - run: pip install -r requirements.txt
+      - run: pip install -r dev-requirements.txt
+      - run: pip install --editable .
+      - run: pytest -v -o junit_family=xunit1 --cov=. --cov-report xml:coverage.xml --cov-report html:test-results/cov_html --junitxml=xunit-reports/xunit.xml
+      - run: pylint licensetool.py tests/*.py
+#  run-pysh-check:
+#    runs-on: ubuntu-22.04
+#    env:
+#      PA_TOKEN: ${{ secrets.ACCESS_TOKEN }} # IzumaBOT Access Token
+#    steps:
+#      - uses: actions/checkout@v3
+#      # Install pyshcheck tooling
+#      - run: sudo apt install pycodestyle pydocstyle black
+#      # git instead of rules to use access token
+#      - run: git config --global url."https://${{ secrets.ACCESS_TOKEN }}@github.com/".insteadOf "git@github.com:"
+#      - run: git config --global url."https://${{ secrets.ACCESS_TOKEN }}@github".insteadOf "https://github"
+#      - run: git config --list
+#      - run: git clone git@github.com:PelionIoT/scripts-internal.git
+#      - run: echo "." >scripts-internal/.nopyshcheck
+#      - run: scripts-internal/pysh-check/pysh-check.sh --workdir .
