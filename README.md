@@ -15,6 +15,8 @@ You need to have Python version 3.6 (or newer) installed in your system. This ha
 
 We highly recommend using a [Python virtual environment](https://docs.python.org/3/tutorial/venv.html).
 
+Python 3.10 will give you unfortunately a lot of warnings. They just love deprecating APIs in the Python world, don't they?
+
 ## User installation
 
 ```
@@ -35,6 +37,8 @@ Run the init script, it will do everything for you.
 
 
 ## Usage
+
+The license file is generated as part of the Yocto build. In Foundries.io LmP-build you can find the file under `<build-folder>/deploy/licenses/<image-name-target-name>/license.manifest`.
 
 ### Generate CSV-formatted license file
 

@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 # Copyright (c) 2021, Pelion Limited and affiliates.
+# Copyright 2022 Izuma Networks
+#
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,6 +17,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+"""Licensetool setup.py."""
+
+
 from setuptools import setup
 
-setup(name='licensetool')
+setup(name="licensetool")

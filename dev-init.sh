@@ -1,6 +1,7 @@
 #!/bin/bash -ex
 # ----------------------------------------------------------------------------
 # Copyright 2021 Pelion
+# Copyright 2021 Izuma Networks
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -23,9 +24,10 @@ if [[ ! -d venv ]]; then
     python3 -m venv venv
 fi
 
+# shellcheck disable=SC1091
 source venv/bin/activate
 
-if [pip show licensetool]; then
+if [[ $(pip show licensetool) ]]; then
     pip uninstall licensetool --yes
 fi
 pip install --editable .
