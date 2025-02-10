@@ -1,6 +1,6 @@
-# ----------------------------------------------------------------------------
-# Copyright 2021 Pelion
-# Copyright 2025 Izuma Networks
+#!/usr/bin/env python3
+#
+# Copyright (c) 2024 Izuma Networks
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -15,6 +15,32 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# ----------------------------------------------------------------------------
 
-__version__ = "1.0.0"
+"""
+A tool for dealing with Yocto license manifest files.
+
+This tool can converting them to CSV/Excel-format,
+optionally with change information. 
+
+This file has the (global) imports required by the tests.
+Actual values defiend in main.py
+"""
+
+
+
+from .main import (
+    read_manifest_file,
+    gen_list,
+    gen_changes,
+    _DATA_SHEET_NAME,
+    main,
+)
+
+
+__all__ = [
+    'read_manifest_file',
+    'gen_list',
+    'gen_changes',
+    '_DATA_SHEET_NAME',
+    'main',
+]

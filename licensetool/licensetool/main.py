@@ -32,8 +32,16 @@ import logging
 import argparse
 import re
 import pandas as pd
-from openpyxl.utils import get_column_letter
 from openpyxl import load_workbook
+
+# Public functions/constants so that tests find
+__all__ = [
+    'read_manifest_file',
+    '_DATA_SHEET_NAME',
+    'gen_list',
+    'gen_changes',
+    # Add other public functions/constants here
+]
 
 # Lots of literals
 _CSV = ".csv"
@@ -130,9 +138,8 @@ def read_manifest_file(input_file):
             ]], columns=column_names)
             d_f = pd.concat([d_f, new_row], ignore_index=True)
 
-        if (
-            package_count == 0
-        ):  # needs to have at least one package or it is an error
+        # Needs to have at least one package or it is an error
+        if package_count == 0:
             print("Package count is zero")
             errors = True
 
@@ -324,8 +331,9 @@ def gen_changes(previous, current, output):
             package_change = True
             change_summary[_PKG_ADD] += 1
         # Package removed
-        if package_change is False and pd.isna(
-            d_f_combo.at[i, _CURR_REC]
+        if (
+                package_change is False and
+                pd.isna(d_f_combo.at[i, _CURR_REC])
         ):  # NaN
             d_f_combo.at[i, _CHG] = _MARK_CHG
             d_f_combo.at[i, _PKG_REM] = _MARK_CHG
@@ -361,8 +369,8 @@ def gen_changes(previous, current, output):
             change_summary[_PKG_REM] += 1
         # Version change
         if (
-            package_change is False
-            and d_f_combo.at[i, _PREV_VER] != d_f_combo.at[i, _CURR_VER]
+                package_change is False
+                and d_f_combo.at[i, _PREV_VER] != d_f_combo.at[i, _CURR_VER]
         ):
             d_f_combo.at[i, _CHG] = _MARK_CHG
             d_f_combo.at[i, _VER_CHG] = _MARK_CHG
@@ -383,8 +391,8 @@ def gen_changes(previous, current, output):
             change_summary[_VER_CHG] += 1
         # License change
         if (
-            package_change is False
-            and d_f_combo.at[i, _PREV_LIC] != d_f_combo.at[i, _CURR_LIC]
+                package_change is False
+                and d_f_combo.at[i, _PREV_LIC] != d_f_combo.at[i, _CURR_LIC]
         ):
             d_f_combo.at[i, _CHG] = _MARK_CHG
             d_f_combo.at[i, _LIC_CHG] = _MARK_CHG
@@ -423,43 +431,46 @@ def gen_changes(previous, current, output):
 #                  styled = styled Pandas dataframe
 #
 def generate_excel(output, styled, template_file=None):
-    """Generate Excel-file (output) from styled Panda's dataframe."""
-    # Add autofilters to Excel sheet
-    # pylint: disable=abstract-class-instantiated
-    writer = pd.ExcelWriter(output, engine="openpyxl")
-
-    if template_file:
+    """Generate Excel file from dataframe."""
+    if template_file and os.path.exists(template_file):
+        # Load template if it exists
         template_book = load_workbook(template_file)
-        writer.book = template_book
 
-    styled.to_excel(writer, sheet_name=_DATA_SHEET_NAME, index=False)
-
-    # Get the xlsxwriter workbook and worksheet objects.
-    # pylint: disable=E1101
-    workbook = writer.book
-    worksheet = workbook[_DATA_SHEET_NAME]
-
-    # put the datasheet first, _sheets is protected
-    # pylint: disable=W0212
-    oldindex = workbook._sheets.index(worksheet)
-    # pylint: disable=W0212
-    workbook._sheets.pop(oldindex)
-    # pylint: disable=W0212
-    workbook._sheets.insert(0, worksheet)
-
-    worksheet.auto_filter.ref = worksheet.dimensions
-
-    colum_names = []
-    for cell in worksheet[1]:
-        colum_names.append(str(cell.value))
-
-    # set default width of colums to match the title
-    for col in range(worksheet.min_column, worksheet.max_column + 1):
-        worksheet.column_dimensions[get_column_letter(col)].width = (
-            len(colum_names[col - 1]) + 5
+        # Write the main data sheet using pandas to_excel directly
+        styled.to_excel(
+            output,
+            sheet_name=_DATA_SHEET_NAME,
+            engine='openpyxl',
+            index=False
         )
 
-    writer.save()
+        # Load the written file to add template sheets
+        workbook = load_workbook(output)
+
+        # Copy sheets from template
+        for sheet_name in template_book.sheetnames:
+            if sheet_name != _DATA_SHEET_NAME:
+                # Copy sheet from template
+                template_sheet = template_book[sheet_name]
+                if sheet_name not in workbook.sheetnames:
+                    workbook.create_sheet(sheet_name)
+                dest_sheet = workbook[sheet_name]
+
+                # Copy content
+                for row in template_sheet.rows:
+                    for cell in row:
+                        dest_sheet[cell.coordinate] = cell.value
+                dest_sheet.sheet_state = 'visible'
+        # Save the workbook
+        workbook.save(output)
+    else:
+        # Just write the dataframe if no template
+        styled.to_excel(
+            output,
+            sheet_name=_DATA_SHEET_NAME,
+            engine='openpyxl',
+            index=False
+        )
 
 
 #
@@ -550,8 +561,9 @@ def parse_list(args):
     if not os.path.isfile(args.inputfile):
         print("ERROR - input file: '" + args.inputfile + "' does not exist.")
         sys.exit(2)  # ENOENT
-    if os.path.isfile(args.listfile + _CSV) or os.path.isfile(
-        args.listfile + _XLS
+    if (
+            os.path.isfile(args.listfile + _CSV) or
+            os.path.isfile(args.listfile + _XLS)
     ):
         if not args.force:
             print("ERROR - output file: '" + args.listfile + _EXISTS)
@@ -576,8 +588,9 @@ def parse_changes(args):
     if not os.path.isfile(args.current):
         print("ERROR - current license file: '" + args.current + _NOT_EXIST)
         sys.exit(2)  # ENOENT
-    if os.path.isfile(args.changefile + _CSV) or os.path.isfile(
-        args.changefile + _XLS
+    if (
+            os.path.isfile(args.changefile + _CSV) or
+            os.path.isfile(args.changefile + _XLS)
     ):
         if not args.force:
             print("ERROR - output file: '" + args.changefile + _EXISTS)

@@ -11,11 +11,11 @@ LicenseTool is a Python program that has two primary functions:
 
 ## Installation
 
-You need to have Python version 3.6 (or newer) installed in your system. This has only been tested in Linux, we do not plan to test or support Windows or Mac platforms in any way or manner as Yocto builds are done on Linux anyway.
+You need to have Python version 3.10 (or newer) installed in your system. This has only been tested in Linux, we do not plan to test or support Windows or Mac platforms in any way or manner as Yocto builds are done on Linux anyway.
 
 We highly recommend using a [Python virtual environment](https://docs.python.org/3/tutorial/venv.html).
 
-Python 3.10 will give you unfortunately a lot of warnings. They just love deprecating APIs in the Python world, don't they?
+If you need to use older versions of Python (3.6 - 3.9), use `v1.0` of this tool.
 
 ## User installation
 
@@ -24,7 +24,7 @@ git clone git@github.com:PelionIoT/licensetool.git
 cd licensetool
 python3 -m venv venv
 source venv/bin/activate
-pip install -r requirements.txt
+pip install .
 ```
 
 ## Developer installation
@@ -42,7 +42,7 @@ The license file is generated as part of the Yocto build. In Foundries.io LmP-bu
 
 ### Generate CSV-formatted license file
 
-`python licensetool.py list <input manifest file> <output>`
+`licensetool list <input manifest file> <output>`
 
 This will generate two output files,
 
@@ -51,7 +51,7 @@ This will generate two output files,
 
 ### Generate license changes file
 
-`python licensetool.py changes <previous manifest file> <current manifest file> <output file>`
+`licensetool changes <previous manifest file> <current manifest file> <output file>`
 
 This will generate two output files,
 
@@ -60,15 +60,19 @@ This will generate two output files,
 
 ### Other options
 
-Run the tool with `python licensetool.py` to get information on optional parameters.
+Run the tool with `licensetool` to get information on optional parameters.
 
 ## Tests
 
 Tests and test material are located in [tests](tests)-folder.
 You can run them from the root folder:
 
+```bash
+tox
 ```
-pytest -v -o junit_family=xunit1 --cov=. --cov-report xml:coverage.xml --cov-report html:test-results/cov_html --junitxml=xunit-reports/xunit.xml
+or just directly for just one Python-version.
+```bash
+pytest -v
 ```
 
 ## Contributions
@@ -76,6 +80,6 @@ pytest -v -o junit_family=xunit1 --cov=. --cov-report xml:coverage.xml --cov-rep
 All contributions must pass:
 - Clear written statement that author agrees to Apache 2.0 license and is the original author of the changes.
 - Code review, so submit a pull request (PR).
-- Run `pylint licensetool.py tests/*.py` and make sure the score does not get worse (10/10 now).
+- Run `tox` and make sure the score does not get worse (10/10 now).
 - Include necessary test case updates, so that coverage does not decrease - provide evidence in the PR.
 - Include required documentation updates.
