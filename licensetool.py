@@ -122,13 +122,13 @@ def read_manifest_file(input_file):
                 errors = True
             prew = info_field.span()[1]
 
-            new_row = {
-                column_names[0]: info_field.group(1),
-                column_names[1]: info_field.group(2),
-                column_names[2]: info_field.group(3),
-                column_names[3]: info_field.group(4),
-            }
-            d_f = d_f.append(new_row, ignore_index=True)
+            new_row = pd.DataFrame([[
+                info_field.group(1),
+                info_field.group(2),
+                info_field.group(3),
+                info_field.group(4),
+            ]], columns=column_names)
+            d_f = pd.concat([d_f, new_row], ignore_index=True)
 
         if (
             package_count == 0
