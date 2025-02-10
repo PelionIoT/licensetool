@@ -3,7 +3,7 @@
 # test_cli - test the command line interface (i.e. argument parsing)
 #
 # Copyright (c) 2021, Pelion Limited and affiliates.
-# Copyright (c) 2022 Izuma Networks
+# Copyright (c) 2022-2025 Izuma Networks
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -25,29 +25,29 @@ import os
 
 # SonarQube duplication fix - success case as literal
 _PY_LCTOOL_LIST_3MANIFESTS = (
-    "python licensetool.py list tests/3-packages.manifest "
+    "licensetool list tests/3-packages.manifest "
 )
 _PY_LCTOOL_CHG_3MANIFESTS = (
-    "python licensetool.py changes tests/3-packages.manifest "
+    "licensetool changes tests/3-packages.manifest "
     "tests/3-packages.manifest.v2 "
 )
 
 
 def test_no_params():
     """Test with no parameters (success, print help)"""
-    ret = os.system("python licensetool.py")
+    ret = os.system("licensetool")
     assert ret == 0
 
 
 def test_list_only():
     """Test with list argument only (fail)"""
-    ret = os.system("python licensetool.py list")
+    ret = os.system("licensetool list")
     assert ret != 0
 
 
 def test_list_non_valid_option():
     """Test with non-valid option (fail)"""
-    ret = os.system("python licensetool.py list --nonvalidoption")
+    ret = os.system("licensetool list --nonvalidoption")
     assert ret != 0
 
 
@@ -84,7 +84,7 @@ def test_list_broken_manifest(tmpdir):
     """Test list with broken input file (fail)"""
     tmp_outfilebase = str(tmpdir.join("out"))
     ret = os.system(
-        "python licensetool.py list tests/broken.manifest " + tmp_outfilebase
+        "licensetool list tests/broken.manifest " + tmp_outfilebase
     )
     assert ret != 0
 
@@ -108,7 +108,7 @@ def test_list_forced_overwrite(tmpdir):
     assert ret == 0
     # Now overwrite them
     ret = os.system(
-        "python licensetool.py --force list tests/3-packages.manifest "
+        "licensetool --force list tests/3-packages.manifest "
         + tmp_outfilebase
     )
     assert ret == 0
@@ -116,20 +116,20 @@ def test_list_forced_overwrite(tmpdir):
 
 def test_changes_only():
     """Test w changes option only (fail)"""
-    ret = os.system("python licensetool.py changes")
+    ret = os.system("licensetool changes")
     assert ret != 0
 
 
 def test_changes_input2_missing():
     """Test w changes option and one input file only (fail)"""
-    ret = os.system("python licensetool.py changes tests/3-packages.manifest ")
+    ret = os.system("licensetool changes tests/3-packages.manifest ")
     assert ret != 0
 
 
 def test_changes_output_missing():
     """Test w changes option and one input file only (fail)"""
     ret = os.system(
-        "python licensetool.py changes tests/3-packages.manifest "
+        "licensetool changes tests/3-packages.manifest "
         "tests/3-packages.manifest.v2"
     )
     assert ret != 0
@@ -139,7 +139,7 @@ def test_changes_input1_not_existing(tmpdir):
     """Test w changes option and non-existent input file (fail)"""
     tmp_outfile = str(tmpdir.join("out"))
     ret = os.system(
-        "python licensetool.py changes non-existent-file"
+        "licensetool changes non-existent-file"
         " tests/3-packages.manifest.v2 " + tmp_outfile
     )
     assert ret != 0
@@ -149,7 +149,7 @@ def test_changes_input2_not_existing(tmpdir):
     """Test w changes option and non-existent 2nd input file (fail)"""
     tmp_outfile = str(tmpdir.join("out"))
     ret = os.system(
-        "python licensetool.py changes tests/3-packages.manifest"
+        "licensetool changes tests/3-packages.manifest"
         " non-existent-file2 " + tmp_outfile
     )
     assert ret != 0
@@ -159,7 +159,7 @@ def test_changes_unknown_option(tmpdir):
     """Test w changes option and unknown option (fail)"""
     tmp_outfile = str(tmpdir.join("out"))
     ret = os.system(
-        "python licensetool.py --unknownoption changes "
+        "licensetool --unknownoption changes "
         " tests/3-packages.manifest tests/3-packages.manifest.v2 "
         + tmp_outfile
     )
@@ -199,7 +199,7 @@ def test_changes_forced_overwrite(tmpdir):
     assert ret == 0
     # Now overwrite them
     ret = os.system(
-        "python licensetool.py --force changes "
+        "licensetool --force changes "
         "tests/3-packages.manifest tests/3-packages.manifest.v2 " + tmp_outfile
     )
     assert ret == 0

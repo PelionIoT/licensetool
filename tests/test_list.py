@@ -3,7 +3,7 @@
 # licensetool.py
 #
 # Copyright (c) 2021, Pelion Limited and affiliates.
-# Copyright (c) 2022 Izuma Networks
+# Copyright (c) 2022-2025 Izuma Networks
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -23,21 +23,10 @@
 """Licensetool test cases for the list command argument."""
 
 
-import sys
 import os
-from pathlib import Path
 import pandas as pd
-
-# Workaround for the module not found problem,
-# tests will at least run with Python 3.10.
-file = Path(__file__).resolve()
-parent, root = file.parent, file.parents[1]
-sys.path.append(str(root))
-
-# noqa
-# pylint: disable=wrong-import-position
 import licensetool as t  # noqa
-from licensetool import _DATA_SHEET_NAME  # noqa
+from licensetool import _DATA_SHEET_NAME
 
 
 # Test empty file
@@ -110,7 +99,7 @@ def test_3_packages_cli(tmpdir):
     # Also via cli for the Excel-version, too
     tmp_outfile = str(tmpdir.join("out"))
     ret = os.system(
-        "python licensetool.py list tests/3-packages.manifest " + tmp_outfile
+        "licensetool list tests/3-packages.manifest " + tmp_outfile
     )
     assert ret == 0
     # Compare result, too

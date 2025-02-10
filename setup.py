@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # Copyright (c) 2021, Pelion Limited and affiliates.
-# Copyright 2022 Izuma Networks
+# Copyright 2022-2025 Izuma Networks
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -20,7 +20,31 @@
 
 """Licensetool setup.py."""
 
+from setuptools import setup, find_packages
 
-from setuptools import setup
-
-setup(name="licensetool")
+setup(
+    name="licensetool",
+    version="1.1.0",
+    packages=find_packages(where="licensetool"),
+    package_dir={"": "licensetool"},
+    python_requires=">=3.10",
+    install_requires=[
+        "numpy>=2.2.0,<3.0.0",
+        "pandas>=2.2.3,<3.0.0",
+        "jinja2",
+        "openpyxl",
+    ],
+    extras_require={
+        "dev": [
+            "pytest>=7.4.0",
+            "pytest-cov>=4.1.0",
+            "black",
+            "pylint",
+        ],
+    },
+    entry_points={
+        "console_scripts": [
+            "licensetool=licensetool.main:main",
+        ],
+    },
+)

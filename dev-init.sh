@@ -1,7 +1,7 @@
 #!/bin/bash -ex
 # ----------------------------------------------------------------------------
 # Copyright 2021 Pelion
-# Copyright 2021 Izuma Networks
+# Copyright 2022-2025 Izuma Networks
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -19,6 +19,11 @@
 # ----------------------------------------------------------------------------
 set -ex
 
+# Tox needs pipx
+if ! command -v pipx &> /dev/null; then
+    pip install pipx
+fi
+
 # Create virtual environment if one is not in place
 if [[ ! -d venv ]]; then
     python3 -m venv venv
@@ -30,7 +35,9 @@ source venv/bin/activate
 if [[ $(pip show licensetool) ]]; then
     pip uninstall licensetool --yes
 fi
-pip install --editable .
 
-pip install -r requirements.txt
-pip install -r dev-requirements.txt
+if ! command -v tox &> /dev/null; then
+    pipx install tox
+fi
+pip install --editable ".[dev]"
+

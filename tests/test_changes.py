@@ -3,7 +3,7 @@
 # licensetool.py / test_changes.py
 #
 # Copyright (c) 2021, Pelion Limited and affiliates.
-# Copyright (c) 2022 Izuma Networks
+# Copyright (c) 2022-2025 Izuma Networks
 #
 #
 # SPDX-License-Identifier: Apache-2.0
@@ -29,7 +29,7 @@ from pathlib import Path
 import pandas as pd
 
 _PY_LCTOOL_CHANGES_PACK = (
-    "python licensetool.py changes tests/3-packages.manifest "
+    "licensetool changes tests/3-packages.manifest "
 )
 
 # Workaround for the module not found problem,
@@ -47,7 +47,7 @@ def test_empty_license_prev(tmpdir):
     """Test with empty 1st file (fail)"""
     tmp_outfiles = str(tmpdir.join("out"))
     ret = os.system(
-        "python licensetool.py changes tests/empty_file.manifest "
+        "licensetool changes tests/empty_file.manifest "
         "tests/3-packages.manifest.v2 " + tmp_outfiles
     )
     assert ret != 0
@@ -90,7 +90,7 @@ def test_invalid_previous(tmpdir):
     """Test with broken 1st input file (fail)"""
     tmp_outfiles = str(tmpdir.join("out"))
     ret = os.system(
-        "python licensetool.py changes tests/broken.manifest "
+        "licensetool changes tests/broken.manifest "
         "tests/3-packages.manifest " + tmp_outfiles
     )
     assert ret != 0
@@ -111,13 +111,21 @@ def test_changes_v1_v2(tmpdir):
     """Test normal success case (success)"""
     tmp_outfiles = str(tmpdir.join("out"))
     ret = os.system(
-        "python licensetool.py changes tests/changes-test.v1 "
+        "licensetool changes tests/changes-test.v1 "
         "tests/changes-test.v2 " + tmp_outfiles
     )
     assert ret == 0
     # Compare result, too
-    ref_df = pd.read_csv("tests/test-changes.csv")
-    result_df = pd.read_csv(tmp_outfiles + ".csv")
+    ref_df = (
+        pd.read_csv("tests/test-changes.csv")
+        .sort_values('Package')
+        .reset_index(drop=True)
+    )
+    result_df = (
+        pd.read_csv(tmp_outfiles + ".csv")
+        .sort_values('Package')
+        .reset_index(drop=True)
+    )
     assert result_df.equals(ref_df)
     # Also the Excel-version
     xl_result_df = pd.read_excel(
